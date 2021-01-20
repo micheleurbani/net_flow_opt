@@ -62,10 +62,6 @@ class System:
             self.from_node_to_edge_capacity(self.structure), "s", "t"
         )
 
-        # Assign IDs to components
-        for i in range(len(self.components)):
-            self.components[i].id = i
-
     def __str__(self):
         message = "System with {} resources.\n".format(self.resources)
         for c in self.components:

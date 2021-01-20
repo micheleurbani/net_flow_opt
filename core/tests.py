@@ -10,7 +10,7 @@ class ComponentTestCase(unittest.TestCase):
 
     def test_components_declaration(self):
         for c in components:
-            self.assertIs(c, Component)
+            self.assertIsInstance(c, Component)
 
 
 class SystemTestCase(unittest.TestCase):
@@ -21,7 +21,7 @@ class SystemTestCase(unittest.TestCase):
             resources=3,
             components=components,
         )
-        self.assertIs(system, System)
+        self.assertIsInstance(system, System)
 
 
 class ActivityTestCase(unittest.TestCase):
