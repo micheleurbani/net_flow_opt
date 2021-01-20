@@ -53,6 +53,7 @@ class System:
         assert type(components) is list
         for c in components:
             assert type(c) is Component
+
         # Attributes
         self.structure = structure
         self.resources = resources
@@ -60,6 +61,10 @@ class System:
         self.regular_flow = nx.maximum_flow_value(
             self.from_node_to_edge_capacity(self.structure), "s", "t"
         )
+
+        # Assign IDs to components
+        for i in range(len(self.components)):
+            self.components[i].id = i
 
     def __str__(self):
         message = "System with {} resources.\n".format(self.resources)
@@ -93,13 +98,13 @@ class System:
             if type(n) is Component:
                 # Twin the node and create an input and an output node
                 e_capacited_graph.add_nodes_from(
-                    ["C" + str(n.id) + s for s in ["_in", "_out"]]
+                    ["C" + str(id(n)) + s for s in ["_in", "_out"]]
                 )
                 # Create a capacited edge between the two nodes: the capacity
                 # is that of the component.
                 e_capacited_graph.add_edge(
-                    "C" + str(n.id) + "_in",
-                    "C" + str(n.id) + "_out",
+                    "C" + str(id(n)) + "_in",
+                    "C" + str(id(n)) + "_out",
                     capacity=n.capacity
                 )
             else:
@@ -113,13 +118,13 @@ class System:
                 for n1 in structure.predecessors(n):
                     if type(n1) is Component:
                         e_capacited_graph.add_edge(
-                            "C" + str(n1.id) + "_out",
-                            "C" + str(n.id) + "_in"
+                            "C" + str(id(n1)) + "_out",
+                            "C" + str(id(n)) + "_in"
                         )
                     elif type(n1) is str:
                         e_capacited_graph.add_edge(
                             n1,
-                            "C" + str(n.id) + "_in"
+                            "C" + str(id(n)) + "_in"
                         )
 
             elif type(n) is str:
@@ -127,7 +132,7 @@ class System:
                 # to check the type of the node
                 e_capacited_graph.add_edges_from(
                     [(
-                        "C" + str(e.id) + "_out",
+                        "C" + str(id(e)) + "_out",
                         n
                     ) for e in structure.predecessors(n)]
                 )

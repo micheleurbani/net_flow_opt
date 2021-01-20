@@ -1,9 +1,9 @@
 import unittest
 
 
-from .system import Component, System
-from .scheduler import Activity
-from .utils import components, structure
+from system import Component, System
+from scheduler import Activity
+from utils import components, structure
 
 
 class ComponentTestCase(unittest.TestCase):
@@ -30,4 +30,4 @@ class ActivityTestCase(unittest.TestCase):
         return super().setUp()
 
 if __name__ == "__main__":
-    runner = unittest.TextTestRunner()
+    unittest.main()
