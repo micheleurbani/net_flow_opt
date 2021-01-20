@@ -1,4 +1,6 @@
+import random
 import unittest
+import networkx as nx
 
 
 from system import Component, System
@@ -15,19 +17,36 @@ class ComponentTestCase(unittest.TestCase):
 
 class SystemTestCase(unittest.TestCase):
 
-    def test_system_declaration(self):
-        system = System(
+    def setUp(self):
+        self.system = System(
             structure=structure,
             resources=3,
             components=components,
         )
-        self.assertIsInstance(system, System)
 
+    def test_system_declaration(self):
+        self.assertIsInstance(self.system, System)
+
+    def test_pointing_to_component(self):
+        cid = random.randint(0, self.system.N - 1)
+        c = self.system.components[cid]
+        new_date = 14.0
+        c.t = new_date
+        self.assertEqual(c.t, self.system.components[cid].t)
+
+    def test_edged_graph(self):
+        e_capacited_graph = self.system.from_node_to_edge_capacity(
+            structure=self.system.structure
+        )
+        self.assertIsInstance(e_capacited_graph, nx.DiGraph)
 
 class ActivityTestCase(unittest.TestCase):
 
     def setUp(self):
-        return super().setUp()
+        cid = random.randint(0, len(components) - 1)
+        self.activity = Activity(
+            component=components[cid]
+        )
 
 if __name__ == "__main__":
     unittest.main()
