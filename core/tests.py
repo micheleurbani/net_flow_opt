@@ -4,8 +4,11 @@ import networkx as nx
 
 
 from system import Component, System
-from scheduler import Activity
+from scheduler import Activity, Group, Plan
 from utils import components, structure
+
+
+random.seed(123)
 
 
 class ComponentTestCase(unittest.TestCase):
@@ -39,6 +42,7 @@ class SystemTestCase(unittest.TestCase):
             structure=self.system.structure
         )
         self.assertIsInstance(e_capacited_graph, nx.DiGraph)
+
 
 class ActivityTestCase(unittest.TestCase):
 
