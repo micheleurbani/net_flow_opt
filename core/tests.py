@@ -43,10 +43,17 @@ class SystemTestCase(unittest.TestCase):
 class ActivityTestCase(unittest.TestCase):
 
     def setUp(self):
-        cid = random.randint(0, len(components) - 1)
+        self.cid = random.randint(0, len(components) - 1)
         self.activity = Activity(
-            component=components[cid]
+            component=components[self.cid],
+            date=14.0,
+            duration=3.0,
         )
+
+    def test_pointing_to_component(self):
+        self.activity.component.x_star = 19.0
+        self.assertEqual(components[self.cid].x_star, \
+            self.activity.component.x_star)
 
 if __name__ == "__main__":
     unittest.main()

@@ -40,7 +40,12 @@ class Activity(object):
             (self.component.beta - 1) * (self.component.xStar + delta_t) \
                 ** (self.component.beta - 2)
 
+
 class Group(object):
+    """
+    Describes a group of maintenance activities that are part of a maintenance
+    plan.
+    """
 
     def __init__(self, components):
         self.components = components

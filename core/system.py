@@ -28,7 +28,7 @@ class Component:
         self.phi_star = (self.cp * self.beta) / (self.x_star * (self.beta - 1))
 
     def __str__(self):
-        return f"C{self.id}"
+        return f"C{id(self)}"
 
     def info(self):
         message = "{} {}\n".format(self.__class__.__name__, self.id)
