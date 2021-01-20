@@ -56,8 +56,46 @@ class ActivityTestCase(unittest.TestCase):
 
     def test_pointing_to_component(self):
         self.activity.component.x_star = 19.0
-        self.assertEqual(components[self.cid].x_star, \
-            self.activity.component.x_star)
+        self.assertEqual(
+            components[self.cid].x_star,
+            self.activity.component.x_star
+        )
+
+
+class GroupTestCase(unittest.TestCase):
+
+    def setUp(self):
+        # Create one maintenance activity per component
+        self.activities = [
+            Activity(
+                component=c,
+                date=c.x_star,
+                duration=random.random() * 3 + 1
+            ) for c in components
+        ]
+        self.selected_activities = random.sample(self.activities, 3)
+        self.group = Group(
+            activities=self.selected_activities,
+        )
+
+    def test_group_feasibility(self):
+        # Test an infeasible group
+        #TODO: find an infeasible group and use it here
+        group = Group(
+            activities=[
+                self.activities[1],
+                self.activities[2],
+                self.activities[3],
+            ]
+        )
+        self.assertTrue(group.is_feasible())
+
+    def test_find_execution_date(self):
+        self.group.minimize()
+        for a in self.group.activities:
+            # print("t_opt: {:.3f}".format(a.t_opt), "\tt: {:.3f}".format(a.t))
+            self.assertNotEqual(a.t_opt, a.t)
+
 
 if __name__ == "__main__":
     unittest.main()
