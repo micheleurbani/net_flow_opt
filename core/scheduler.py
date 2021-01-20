@@ -63,6 +63,14 @@ class Group(object):
     def ddH(self, x):
         return sum((a.ddh(x - a.t) for a in self.activities))
 
+    def is_feasible(self):
+        earliest_start = max((a.t - a.component.xStar for a in \
+            self.activities))
+        is_feasible = True
+        for a in self.activities:
+            if a.t + a.component.xStar < earliest_start:
+                is_feasible = False
+        return is_feasible
 
 class Plan(object):
 
