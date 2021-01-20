@@ -1,3 +1,4 @@
+import copy
 import random
 import unittest
 import networkx as nx
@@ -91,10 +92,14 @@ class GroupTestCase(unittest.TestCase):
         self.assertTrue(group.is_feasible())
 
     def test_find_execution_date(self):
-        self.group.minimize()
-        for a in self.group.activities:
+        optimized_group = copy.deepcopy(self.group)
+        optimized_group.minimize()
+        for i in range(self.group.size):
             # print("t_opt: {:.3f}".format(a.t_opt), "\tt: {:.3f}".format(a.t))
-            self.assertNotEqual(a.t_opt, a.t)
+            self.assertNotEqual(
+                self.group.activities[i].t,
+                optimized_group.activities[i].t
+            )
 
 
 if __name__ == "__main__":

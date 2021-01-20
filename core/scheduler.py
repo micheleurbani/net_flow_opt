@@ -14,7 +14,6 @@ class Activity(object):
         self.component = component
         self.t = date
         self.d = duration
-        self.t_opt = self.t
 
     def expectedCost(self, x):
         return self.component.cp + self.component.cc * \
