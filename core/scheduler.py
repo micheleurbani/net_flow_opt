@@ -22,22 +22,22 @@ class Activity(object):
 
     def h(self, delta_t):
         """Penalty function to defer the component from its PM date."""
-        return self.expectedCost(self.component.xStar + delta_t) - \
-            self.expectedCost(self.component.xStar) - delta_t * \
-            self.component.phiStar
+        return self.expectedCost(self.component.x_star + delta_t) - \
+            self.expectedCost(self.component.x_star) - delta_t * \
+            self.component.phi_star
 
     def dh(self, delta_t):
         """Derivative of the penalty function."""
         return self.component.cc * self.component.alpha ** \
-            (-self.component.beta) * (self.component.xStar + delta_t) ** \
-            (self.component.beta - 1) * self.compoennt.beta - \
-            self.component.phiStar
+            (-self.component.beta) * (self.component.x_star + delta_t) ** \
+            (self.component.beta - 1) * self.component.beta - \
+            self.component.phi_star
 
     def ddh(self, delta_t):
         """Second derivative of the penalty function."""
         return self.component.cc * self.component.alpha ** \
             (-self.component.beta) * self.component.beta * \
-            (self.component.beta - 1) * (self.component.xStar + delta_t) \
+            (self.component.beta - 1) * (self.component.x_star + delta_t) \
             ** (self.component.beta - 2)
 
 
@@ -52,6 +52,7 @@ class Group(object):
 
     def __init__(self, activities):
         self.activities = activities
+        self.size = len(self.activities)
 
     def H(self, x):
         """Return the expected cost of corrective maintenance of the group."""
