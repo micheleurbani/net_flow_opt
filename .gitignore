@@ -1,0 +1,7 @@
+# Folders
+venv/
+.vscode/
+__*/
+
+# Files
+.env
