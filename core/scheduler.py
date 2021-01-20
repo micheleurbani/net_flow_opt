@@ -65,13 +65,27 @@ class Group(object):
         return sum((a.ddh(x - a.t) for a in self.activities))
 
     def is_feasible(self):
-        earliest_start = max((a.t - a.component.xStar for a in \
+        earliest_start = max((a.t - a.component.x_star for a in \
             self.activities))
         is_feasible = True
         for a in self.activities:
-            if a.t + a.component.xStar < earliest_start:
+            if a.t + a.component.x_star < earliest_start:
                 is_feasible = False
         return is_feasible
+
+    def minimize(self):
+        """
+        Implement the Newton method to find the optimal execution date for the
+        group, and the `t_opt` of each component is set to the found date.
+        """
+        x = [sum((a.t for a in self.activities)) / self.size]
+        diff = 1e5
+        while diff > 1e-3:
+            x.append(x[-1] - self.dH(x[-1]) / self.ddH(x[-1]))
+            diff = x[-2] - x[-1]
+        for a in self.activities:
+            a.t_opt = x[-1]
+
 
 class Plan(object):
 
