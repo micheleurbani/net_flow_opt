@@ -1,3 +1,7 @@
+import pandas as pd
+import plotly.express as px
+
+
 class Activity(object):
     """
     The object desribes a maintenance activity; this is always associated to a
@@ -64,8 +68,8 @@ class Group(object):
         return sum((a.ddh(x - a.t) for a in self.activities))
 
     def is_feasible(self):
-        earliest_start = max((a.t - a.component.x_star for a in \
-            self.activities))
+        earliest_start = max((a.t - a.component.x_star for a in
+                              self.activities))
         is_feasible = True
         for a in self.activities:
             if a.t + a.component.x_star < earliest_start:
@@ -83,9 +87,48 @@ class Group(object):
             x.append(x[-1] - self.dH(x[-1]) / self.ddH(x[-1]))
             diff = x[-2] - x[-1]
         for a in self.activities:
-            a.t_opt = x[-1]
+            a.t = x[-1]
 
 
 class Plan(object):
+    """
+    The object describes a generic maintenance plan, i.e. a list of activities
+    with the associated maintenance date.
 
-    pass
+    :param list activities: a list of :class:`core.scheduler.Activity` objects.
+
+    """
+
+    def __init__(self, activities):
+        self.activities = activities
+
+    def gantt_chart(self):
+        """
+        The method returns a :class:`plotly.express.timeline` object.
+        """
+        plan_data = pd.DataFrame(
+            [
+                {
+                    "Activity": str(id(a)),
+                    "Component": str(id(a.component)),
+                    "Start": a.t,
+                    "End": a.t + a.d,
+                } for a in self.activities
+            ]
+        )
+        # Sort activities in descending order
+        plan_data.sort_values(by=["Start"], inplace=True, reversed=True)
+        # Convert float dates to datetime
+        plan_data["Start"] = pd.to_datetime(plan_data["Start"] * 1e12,
+                                            format="%Y-%m-%d")
+        plan_data["End"] = pd.to_datetime(plan_data["End"] * 1e12,
+                                          format="%Y-%m-%d")
+        # Create figure
+        gantt = px.timeline(
+            data_frame=plan_data,
+            x_start="Start",
+            x_end="End",
+            y="Component",
+        )
+        # gantt.show()
+        return gantt

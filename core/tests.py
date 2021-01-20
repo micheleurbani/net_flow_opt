@@ -1,5 +1,6 @@
 import copy
 import random
+import plotly
 import unittest
 import networkx as nx
 
@@ -81,7 +82,7 @@ class GroupTestCase(unittest.TestCase):
 
     def test_group_feasibility(self):
         # Test an infeasible group
-        #TODO: find an infeasible group and use it here
+        # TODO: find an infeasible group and use it here
         group = Group(
             activities=[
                 self.activities[1],
@@ -95,11 +96,34 @@ class GroupTestCase(unittest.TestCase):
         optimized_group = copy.deepcopy(self.group)
         optimized_group.minimize()
         for i in range(self.group.size):
-            # print("t_opt: {:.3f}".format(a.t_opt), "\tt: {:.3f}".format(a.t))
+            # print(
+            #     "t_opt: {:.3f}".format(optimized_group.activities[i].t),
+            #     "\tt: {:.3f}".format(self.group.activities[i].t)
+            # )
             self.assertNotEqual(
                 self.group.activities[i].t,
                 optimized_group.activities[i].t
             )
+
+
+class PlanTestCase(unittest.TestCase):
+
+    def setUp(self):
+        # Create one maintenance activity per component
+        self.activities = [
+            Activity(
+                component=c,
+                date=c.x_star,
+                duration=random.random() * 3 + 1
+            ) for c in components
+        ]
+        self.plan = Plan(activities=self.activities)
+
+    def test_gantt_chart(self):
+        self.assertIsInstance(
+            self.plan.gantt_chart(),
+            plotly.graph_objs._figure.Figure
+        )
 
 
 if __name__ == "__main__":
