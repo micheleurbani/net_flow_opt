@@ -61,6 +61,7 @@ class System:
         self.regular_flow = nx.maximum_flow_value(
             self.from_node_to_edge_capacity(self.structure), "s", "t"
         )
+        self.N = len(self.components)
 
     def __str__(self):
         message = "System with {} resources.\n".format(self.resources)
