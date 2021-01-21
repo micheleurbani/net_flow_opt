@@ -2,6 +2,7 @@ import copy
 import random
 import plotly
 import unittest
+import numpy as np
 import networkx as nx
 
 

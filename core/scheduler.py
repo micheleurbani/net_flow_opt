@@ -22,7 +22,7 @@ class Activity(object):
         self.d = duration
 
     def __str__(self):
-        return "Component {},\tt={},\td={}.".format(id(self.component), self.t,
+        return "Component {},\tt={:.3f},\td={:.3f}.".format(id(self.component), self.t,
                                                     self.d)
 
     def expectedCost(self, x):
@@ -109,7 +109,7 @@ class Plan(object):
     def __init__(self, activities, system, grouping_structure=None):
         self.activities = activities
         self.system = system
-        if grouping_structure:
+        if grouping_structure is not None:
             # Save the grouping structure as attribute (for future use in E/T
             # minimization)
             self.grouping_structure = grouping_structure
@@ -117,9 +117,10 @@ class Plan(object):
             self.set_dates(self.grouping_structure)
 
     def __str__(self):
-        message = "Plan with {} resources.".format(self.system.resources)
-        for activity in self.activities:
+        message = "Plan with {} resources.\n".format(self.system.resources)
+        for activity in sorted(self.activities, key=lambda x: x.t):
             message += "{}\n".format(activity)
+        return message
 
     def gantt_chart(self):
         """
@@ -151,3 +152,24 @@ class Plan(object):
         )
         # gantt.show()
         return gantt
+
+    def set_dates(self, grouping_structure):
+        """
+        Implement the whole optimization procedure: firstly, activities are
+        scheduled at group date, and subsequently they are ordered according to
+        group date. Finally, the trust region constrained algorithm is used to
+        resolve conflicts about the use of resources.
+
+        :param np.array grouping_structure: the array encoding the assignment
+        of activities to groups and to resources.
+        """
+        # Iterate over the columns of the grouping structure
+        for j in range(grouping_structure.shape[1]):
+            # Avoid calculation for empty groups
+            if grouping_structure[:, j].any():
+                # Use Group objects to set activities' dates
+                g = Group(
+                    activities=[self.activities[i] for i in
+                    range(self.system.N) if grouping_structure[i, j] == 1]
+                )
+                g.minimize()
