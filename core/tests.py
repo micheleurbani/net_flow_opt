@@ -153,15 +153,30 @@ class PlanTestCase(unittest.TestCase):
         # print(plan_opt)
         # Compare the original plan with the new plan
         for j in range(sgm.shape[1]):
-            # Check each column of the sgm: if there are more than one activity,
-            # compare the new dates with the old ones; these should differ.
-            if sgm[:, j].any():
+            # Check each column of the sgm: if there are more than one
+            # activity, compare the new dates with the old ones; these should
+            # differ.
+            if np.sum(sgm[:, j]) > 1:
                 for i in range(len(sgm[:, j])):
                     if sgm[i, j] == 1:
                         self.assertNotEqual(
                             self.plan.activities[i].t,
                             plan_opt.activities[i].t,
                         )
+
+    def test_structure_history_generation(self):
+        history = self.plan.generate_structure_history()
+        # Verify that the number of nodes changes before and after each date
+        for i in range(1, len(history)):
+            self.assertNotEqual(
+                len(history[i]["structure"].nodes),
+                len(history[i + 1]["structure"].nodes),
+            )
+            self.assertIsInstance(history[i], dict)
+            self.assertIsInstance(
+                history[i]["structure"],
+                nx.DiGraph
+            )
 
 
 if __name__ == "__main__":

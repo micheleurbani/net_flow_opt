@@ -57,7 +57,7 @@ class System:
         # Attributes
         self.structure = structure
         self.resources = resources
-        self.components = components
+        self.components = self.indexing(components)
         self.regular_flow = nx.maximum_flow_value(
             self.from_node_to_edge_capacity(self.structure), "s", "t"
         )
@@ -73,8 +73,18 @@ class System:
         """Draw the graph representing the srtucture of the system."""
         if structure is None:
             structure = self.structure
-        nx.draw_networkx(nx.DiGraph(structure))
-        plt.show()
+        nx.draw_networkx(
+            nx.DiGraph(structure),
+            pos=nx.spectral_layout(nx.DiGraph(structure))
+        )
+        plt.savefig('graph')
+
+    @staticmethod
+    def indexing(components):
+        for i, c in enumerate(components):
+            assert type(c) is Component
+            c.idx = i
+        return components
 
     @staticmethod
     def from_node_to_edge_capacity(structure):

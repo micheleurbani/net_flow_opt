@@ -2,6 +2,7 @@ import copy
 import pandas as pd
 import networkx as nx
 import plotly.express as px
+import matplotlib.pyplot as plt
 
 
 class Activity(object):
@@ -177,7 +178,8 @@ class Plan(object):
 
     def generate_structure_history(self):
         """
-        The method returns a list of system configurations and their duration.
+        The method returns a list of system configurations and their start
+        date.
 
         :return: a list of tuples containing a :class:`networkx.DiGraph`
         object, a float with the duration of the configuration, the start date
@@ -188,21 +190,28 @@ class Plan(object):
         # Gather events' dates
         dates = [{"date": a.t} for a in self.activities] + \
             [{"date": a.t + a.d} for a in self.activities]
+        # Add the start date at time 0
+        dates.append({"date": 0.0})
         # Sort events in ascending order of date
         dates.sort(key=lambda a: a["date"])
         # Iterate over all events to find the set of non-active nodes
         for event in dates:
             # Create a deep copy of the DiGraph object
             event["structure"] = copy.deepcopy(self.system.structure)
-            # event["structure"].remove_nodes_from(
-            print(self.system.structure.nodes)
-            print(
+            # Collect non-active nodes' idxs
+            node_ids = [
+                    a.component.idx for a in self.activities if
+                    a.t + a.d > event["date"] and
+                    a.t <= event["date"]
+                ]
+            # Remove non-active nodes from the graph
+            event["structure"].remove_nodes_from(
                 [
-                    a.component for a in self.activities if \
-                        a.t + a.d > event["date"] and \
-                            a.t <= event["date"]
+                    n for n in event["structure"].nodes if type(n) is not str
+                    and n.idx in node_ids
                 ]
             )
+        return history
 
     def total_flow_reduction(self):
         """
@@ -217,7 +226,7 @@ class Plan(object):
 
         .. math::
 
-            \sum \left( \mu(N) - \mu(A_i) \\right) \cdot d_i
+            \\sum \\left( \\mu(N) - \\mu(A_i) \\right) \\cdot d_i
 
         where :math:`i` denotes a system configuration, and :math:`A_i` denotes
         the set of active nodes under configuration :math:`i`.
