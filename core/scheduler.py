@@ -1,4 +1,6 @@
+import copy
 import pandas as pd
+import networkx as nx
 import plotly.express as px
 
 
@@ -96,11 +98,13 @@ class Plan(object):
     with the associated maintenance date.
 
     :param list activities: a list of :class:`core.scheduler.Activity` objects.
+    :param objecet system: a :class:`core.system.System` object.
 
     """
 
-    def __init__(self, activities):
+    def __init__(self, activities, system):
         self.activities = activities
+        self.system = system
 
     def gantt_chart(self):
         """
