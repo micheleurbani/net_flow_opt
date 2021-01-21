@@ -21,6 +21,10 @@ class Activity(object):
         self.t = date
         self.d = duration
 
+    def __str__(self):
+        return "Component {},\tt={},\td={}.".format(id(self.component), self.t,
+                                                    self.d)
+
     def expectedCost(self, x):
         return self.component.cp + self.component.cc * \
             (x / self.component.alpha) ** self.component.beta
@@ -102,9 +106,20 @@ class Plan(object):
 
     """
 
-    def __init__(self, activities, system):
+    def __init__(self, activities, system, grouping_structure=None):
         self.activities = activities
         self.system = system
+        if grouping_structure:
+            # Save the grouping structure as attribute (for future use in E/T
+            # minimization)
+            self.grouping_structure = grouping_structure
+            # Set activities' dates according to the grouping structure
+            self.set_dates(self.grouping_structure)
+
+    def __str__(self):
+        message = "Plan with {} resources.".format(self.system.resources)
+        for activity in self.activities:
+            message += "{}\n".format(activity)
 
     def gantt_chart(self):
         """
