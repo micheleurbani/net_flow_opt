@@ -118,13 +118,50 @@ class PlanTestCase(unittest.TestCase):
                 duration=random.random() * 3 + 1
             ) for c in components
         ]
-        self.plan = Plan(activities=self.activities)
+        self.system = System(
+            structure=structure,
+            resources=3,
+            components=components
+        )
+        self.plan = Plan(
+            activities=self.activities,
+            system=self.system,
+        )
 
     def test_gantt_chart(self):
         self.assertIsInstance(
             self.plan.gantt_chart(),
             plotly.graph_objs._figure.Figure
         )
+
+    def test_group_assignment(self):
+        # Encode a random grouping structure in a numpy array
+        sgm = []
+        for i in range(self.system.N):
+            x = np.zeros(self.system.N)
+            x[np.random.randint(self.system.N)] = 1
+            sgm.append(x)
+        sgm = np.stack(sgm)
+        # print(sgm)
+        # Create a copy of the plan to be modified according to the sgm
+        plan_opt = Plan(
+            system=copy.deepcopy(self.system),
+            activities=copy.deepcopy(self.activities),
+            grouping_structure=sgm,
+        )
+        # print(self.plan, "\n")
+        # print(plan_opt)
+        # Compare the original plan with the new plan
+        for j in range(sgm.shape[1]):
+            # Check each column of the sgm: if there are more than one activity,
+            # compare the new dates with the old ones; these should differ.
+            if sgm[:, j].any():
+                for i in range(len(sgm[:, j])):
+                    if sgm[i, j] == 1:
+                        self.assertNotEqual(
+                            self.plan.activities[i].t,
+                            plan_opt.activities[i].t,
+                        )
 
 
 if __name__ == "__main__":

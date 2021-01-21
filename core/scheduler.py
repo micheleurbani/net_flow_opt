@@ -22,8 +22,8 @@ class Activity(object):
         self.d = duration
 
     def __str__(self):
-        return "Component {},\tt={:.3f},\td={:.3f}.".format(id(self.component), self.t,
-                                                    self.d)
+        return "Component {},\tt={:.3f},\td={:.3f}.".format(id(self.component),
+                                                            self.t, self.d)
 
     def expectedCost(self, x):
         return self.component.cp + self.component.cc * \
@@ -170,6 +170,7 @@ class Plan(object):
                 # Use Group objects to set activities' dates
                 g = Group(
                     activities=[self.activities[i] for i in
-                    range(self.system.N) if grouping_structure[i, j] == 1]
+                                range(self.system.N) if
+                                grouping_structure[i, j] == 1]
                 )
                 g.minimize()
