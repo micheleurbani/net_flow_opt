@@ -5,16 +5,46 @@
 {% endblock css %}
 
 {% block content %}
-<form class="form-signin">
-  <div class="form-group row">
-    <label for="inputEmail1">Email address</label>
-    <input type="email" class="form-control" id="inputEmail1" aria-describedby="emailHelp">
-    <small id="emailHelp" class="form-text text-muted">You can use your institutional email.</small>
-  </div>
-  <div class="form-group row">
-    <label for="inputPassword1">Password</label>
-    <input type="password" class="form-control" id="inputPassword1">
-  </div>
-  <button type="submit" class="btn btn-primary">Sign in</button>
-</form>
+<div class="form-wrapper">
+
+  {% for message in get_flashed_messages() %}
+    <div class="alert alert-warning">
+      {{ message }}
+    </div>
+  {% endfor %}
+
+  <h1>Log In</h1>
+
+  <form method="POST" action="/login" class="form-signin">
+    {{ form.csrf_token }}
+
+    <div class="form-group row">
+      <fieldset class="email">
+        {{ form.email(placeholder='Email address', class="form-control") }}
+        {% if form.email.errors %}
+        <ul class="errors">
+          {% for error in form.email.errors %}
+          <li>{{ error }}</li>{% endfor %}
+        </ul>
+        {% endif %}
+      </fieldset>
+    </div>
+
+    <div class="form-group row">
+      <fieldset class="password">
+        {{ form.password(placeholder='Password', class="form-control") }}
+        {% if form.email.errors %}
+          <ul class="errors">
+            {% for error in form.password.errors %}
+              <li>{{ error }}</li>{% endfor %}
+          </ul>
+        {% endif %}
+      </fieldset>
+    </div>
+
+    <div class="submit-button">
+      {{ form.submit(class="btn btn-lg btn-primary btn-block") }}
+    </div>
+  </form>
+</div>
 {% endblock %}

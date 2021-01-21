@@ -117,11 +117,11 @@ class Plan(object):
             ]
         )
         # Sort activities in descending order
-        plan_data.sort_values(by=["Start"], inplace=True, reversed=True)
+        plan_data.sort_values(by=["Start"], inplace=True, ascending=False)
         # Convert float dates to datetime
-        plan_data["Start"] = pd.to_datetime(plan_data["Start"] * 1e12,
+        plan_data["Start"] = pd.to_datetime(plan_data["Start"] * 1e14,
                                             format="%Y-%m-%d")
-        plan_data["End"] = pd.to_datetime(plan_data["End"] * 1e12,
+        plan_data["End"] = pd.to_datetime(plan_data["End"] * 1e14,
                                           format="%Y-%m-%d")
         # Create figure
         gantt = px.timeline(
