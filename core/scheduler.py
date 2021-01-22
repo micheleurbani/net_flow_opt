@@ -63,6 +63,13 @@ class Group(object):
     def __init__(self, activities):
         self.activities = activities
         self.size = len(self.activities)
+        self.IC = None
+
+    def __str__(self):
+        message = "Group with {} activities:\n".format(self.size)
+        for a in self.activities:
+            message += "{}\n".format(a)
+        return message
 
     def H(self, x):
         """Return the expected cost of corrective maintenance of the group."""
