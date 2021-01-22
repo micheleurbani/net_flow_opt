@@ -183,6 +183,7 @@ class PlanTestCase(unittest.TestCase):
         # Change the plan by adding a random grouping structure
         self.add_random_grouping()
         for a in self.activities:
+            print(a.r)
             self.assertIsNotNone(a.r)
 
     def test_generate_structure_history(self):
