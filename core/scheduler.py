@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import networkx as nx
 import plotly.express as px
+from scipy.optimize import Bounds, LinearConstraint, minimize
 
 
 class Activity(object):
@@ -127,11 +128,11 @@ class Plan(object):
             # Save the grouping structure as attribute (for future use in E/T
             # minimization)
             self.grouping_structure = grouping_structure
-            # Set activities' dates according to the grouping structure.
-            # set_dates updates also the IC of the plan.
-            self.set_dates(self.grouping_structure)
             # Assign activities to resources
             self.set_resources()
+            # Set activities' dates according to the grouping structure.
+            # set_dates updates also the IC of the plan.
+            self.set_dates()
             # Evaluate the new LF
             self.LF = self.evaluate_flow_reduction()
 
@@ -171,7 +172,7 @@ class Plan(object):
         )
         return gantt
 
-    def set_dates(self, grouping_structure):
+    def set_dates(self):
         """
         Implement the whole optimization procedure: firstly, activities are
         scheduled at group date, and subsequently they are ordered according to
@@ -184,9 +185,21 @@ class Plan(object):
         """
         # Initialize IC to 0
         self.IC = 0.0
-        # Squeeze the matrix with the grouping structure to containg only the
-        # information about assignment to a group
-        grouping_structure = np.sum(grouping_structure, axis=-1)
+        # Add index to activities
+        for i, a in enumerate(self.activities): a.idx = i
+        # Store a copy of the original plan
+        original_plan = Plan(
+            activities=copy.deepcopy(self.activities),
+            system=copy.deepcopy(self.system),
+        )
+        # Lists to store coefficients of the optimization problem
+        A, lb, ub = [], [], []
+        ##################################
+        # PARTITION ACTIVITIES INTO GROUPS
+        ##################################
+        # Squeeze the matrix containing the grouping structure to containg only
+        # the information about assignment to a group
+        grouping_structure = np.sum(self.grouping_structure, axis=-1)
         # Iterate over the columns of the grouping structure
         for j in range(grouping_structure.shape[1]):
             # Avoid calculation for empty groups
@@ -198,8 +211,52 @@ class Plan(object):
                                 grouping_structure[i, j] == 1]
                 )
                 g.minimize()
-                # Update IC
-                self.IC += g.IC
+                # Define the constraint to guarantee the nested interval
+                if len(g.activities) > 1:
+                    c = np.zeros(self.system.N)
+                    for i in range(len(g.activities) - 1):
+                        c[g.activities[i].idx] = -1
+                        c[g.activities[i + 1].idx] = 1
+                        A.append(c)
+                        lb.append(0.0)
+                        ub.append(
+                            g.activities[i].d - g.activities[i + 1].d
+                        )
+
+        ################################################
+        # FORMULATE THE CONSTRAINED OPTIMIZATION PROBLEM
+        ################################################
+        # Define constraints on the use of resources
+        for r in range(self.system.resources):
+            A_r = [a for a in self.activities if a.r == r]
+            if len(A_r) > 1:
+                A_r.sort(key=lambda x: x.t)
+                for i in range(len(A_r) - 1):
+                    c = np.zeros(self.system.N)
+                    c[A_r[i].idx] = 1
+                    c[A_r[i + 1].idx] = -1
+                    A.append(c)
+                    lb.append(-np.inf)
+                    ub.append(-A_r[i].d)
+        # Define the LinearConstraint objecet
+        linear_constraints = LinearConstraint(
+            A=np.stack(A),
+            lb=np.array(lb),
+            ub=np.array(ub),
+        )
+        # Define the objective function
+        obj = lambda t: sum((a.h(t[i] - a.t) for i, a in \
+                            enumerate(original_plan.activities)))
+        # Define and solve the problem
+        solution = minimize(
+            fun=obj,
+            x0=[a.t for a in self.activities],
+            method='trust-constr',
+            constraints=[linear_constraints],
+        )
+        print(solution)
+
+        self.IC = 5.0
 
     def set_resources(self):
         """Store the resource id in each activity."""

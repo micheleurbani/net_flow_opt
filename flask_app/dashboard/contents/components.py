@@ -1,4 +1,3 @@
-import dash
 import dash_table
 import dash_core_components as dcc
 import dash_html_components as html
@@ -20,7 +19,8 @@ load_components = html.Div(id='load-components-list', children=[
 
 components_table = html.Div(children=[
     html.H3("Component Parameters"),
-    html.P("The paramtes of components can be declared using the table below. The meaning of each paramter is explained in the following."),
+    html.P("The paramtes of components can be declared using the table below.\
+        The meaning of each paramter is explained in the following."),
     dash_table.DataTable(
         id='table-component-parameters',
         editable=True,
@@ -42,8 +42,16 @@ components_table = html.Div(children=[
                 ]
             ),
             dbc.ModalFooter([
-                dbc.Button("Save", id="btn-system-save", className="mr-auto", color='primary'),
-                dbc.Button("Close", id="btn-system-close", className="ml-auto", color='primary')
+                dbc.Button(
+                    "Save",
+                    id="btn-system-save",
+                    className="mr-auto",
+                    color='primary'),
+                dbc.Button(
+                    "Close",
+                    id="btn-system-close",
+                    className="ml-auto",
+                    color='primary')
             ]),
         ],
         id='modal-system',
@@ -55,9 +63,12 @@ components_plots = html.Div(id='components-features', children=[
     html.Br(),
     html.Center(
         dbc.ButtonGroup([
-            dbc.Button('PDF', id='btn-components-pdf', n_clicks=0, outline=True, color='primary'),
-            dbc.Button('CDF', id='btn-components-cdf', n_clicks=0, outline=True, color='primary'),
-            dbc.Button('Failure rate', id='btn-components-failure-rate', n_clicks=0, outline=True, color='primary'),
+            dbc.Button('PDF', id='btn-components-pdf', n_clicks=0,
+                       outline=True, color='primary'),
+            dbc.Button('CDF', id='btn-components-cdf', n_clicks=0,
+                       outline=True, color='primary'),
+            dbc.Button('Failure rate', id='btn-components-failure-rate',
+                       n_clicks=0, outline=True, color='primary'),
         ])
     ),
     dcc.Graph(id='components-plot')
@@ -76,5 +87,5 @@ components_contents = html.Div(children=[
         ),
         components_plots
     ]),
-    html.Div(id="hidden-div", style={"display":"none"}),
+    html.Div(id="hidden-div", style={"display": "none"}),
 ])

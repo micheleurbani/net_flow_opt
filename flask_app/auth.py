@@ -1,7 +1,7 @@
-from flask import Blueprint, redirect, render_template, flash, request, session, url_for
-from flask_login import login_required, logout_user, current_user, login_user
+from flask import Blueprint, redirect, render_template, flash, request, url_for
+from flask_login import current_user, login_user
 from .forms import LoginForm
-from .models import db, User
+from .models import User
 from . import login_manager
 
 
@@ -23,7 +23,7 @@ def login():
     """
     # Bypass if user is logged in
     if current_user.is_authenticated:
-        return redirect(url_for('dashboard'))
+        return redirect(url_for('/dashapp/'))
 
     form = LoginForm()
     # Validate login attempt
@@ -32,7 +32,8 @@ def login():
         if user and user.check_password(password=form.password.data):
             login_user(user)
             next_page = request.args.get('next')
-            return redirect(next_page or url_for('dashboard'))
+            flash('Login successfuly!')
+            return redirect(next_page or url_for('/dashapp/'))
         flash('Invalid username/password combination')
         return redirect(url_for('auth_bp.login'))
     return render_template(
@@ -43,12 +44,14 @@ def login():
         body="Log in with your User account."
     )
 
+
 @login_manager.user_loader
 def load_user(user_id):
     """Check if user is logged-in on every page load."""
     if user_id is not None:
         return User.query.get(user_id)
     return None
+
 
 @login_manager.unauthorized_handler
 def unauthorized():

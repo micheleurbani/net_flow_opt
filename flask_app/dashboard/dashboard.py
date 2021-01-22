@@ -1,5 +1,4 @@
 from dash import Dash
-import dash_core_components as dcc
 import dash_html_components as html
 import dash_bootstrap_components as dbc
 
@@ -14,7 +13,8 @@ def init_dashboard(server):
         server=server,
         routes_pathname_prefix='/dashapp/',
         external_stylesheets=[
-            'https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css',
+            'https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/\
+                dist/css/bootstrap.min.css',
         ]
     )
 
@@ -30,11 +30,10 @@ def init_dashboard(server):
         ]
     )
 
-    dash_app.layout = html.Div([
-        card_tabs,
-    ],
+    dash_app.layout = html.Div(
+        [
+            card_tabs,
+        ],
     )
-
-    
 
     return dash_app.server

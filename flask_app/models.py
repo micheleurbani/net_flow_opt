@@ -12,7 +12,7 @@ class User(UserMixin, db.Model):
         db.Integer,
         primary_key=True
     )
-    name = db.Column(
+    username = db.Column(
         db.String(100),
         nullable=False,
         unique=False
@@ -27,7 +27,7 @@ class User(UserMixin, db.Model):
         primary_key=False,
         unique=False,
         nullable=False
-	)
+    )
     created_on = db.Column(
         db.DateTime,
         index=False,

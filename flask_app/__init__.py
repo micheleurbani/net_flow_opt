@@ -27,7 +27,7 @@ def init_app():
         app.register_blueprint(routes.main_bp)
         app.register_blueprint(auth.auth_bp)
 
-        db.create_all() # Create sql tables for our data models
+        db.create_all()  # Create sql tables for our data models
 
         # Import Dash application
         from .dashboard.dashboard import init_dashboard
