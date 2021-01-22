@@ -128,6 +128,21 @@ class PlanTestCase(unittest.TestCase):
             system=self.system,
         )
 
+    def add_random_grouping(self):
+        # Encode a random grouping structure in a numpy array
+        sgm = []
+        for i in range(self.system.N):
+            x = np.zeros(self.system.N)
+            x[np.random.randint(self.system.N)] = 1
+            sgm.append(x)
+        sgm = np.stack(sgm)
+        # print(sgm)
+        self.plan = Plan(
+            activities=self.activities,
+            system=self.system,
+            grouping_structure=sgm,
+        )
+
     def test_gantt_chart(self):
         self.assertIsInstance(
             self.plan.gantt_chart(),
@@ -165,13 +180,11 @@ class PlanTestCase(unittest.TestCase):
                         )
 
     def test_structure_history_generation(self):
+        # Change the plan by adding a random grouping structure
+        self.add_random_grouping()
         history = self.plan.generate_structure_history()
         # Verify that the number of nodes changes before and after each date
         for i in range(1, len(history)):
-            self.assertNotEqual(
-                len(history[i]["structure"].nodes),
-                len(history[i + 1]["structure"].nodes),
-            )
             self.assertIsInstance(history[i], dict)
             self.assertIsInstance(
                 history[i]["structure"],
@@ -179,9 +192,18 @@ class PlanTestCase(unittest.TestCase):
             )
 
     def test_flow_history(self):
+        # Change the plan by adding a random grouping structure
+        self.add_random_grouping()
         history = self.plan.generate_flow_history()
         for config in history:
             self.assertGreaterEqual(config["flow"], 0)
+
+    def test_evaluate_flow_reduction(self):
+        # Change the plan by adding a random grouping structure
+        self.add_random_grouping()
+        history = self.plan.generate_flow_history()
+        lf = self.plan.evaluate_flow_reduction()
+        self.assertGreater(lf, 0)
 
 if __name__ == "__main__":
     unittest.main()
