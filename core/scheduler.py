@@ -207,10 +207,10 @@ class Plan(object):
             # Check the activity has not been assigned to a resource yet.
             assert a.r is None
             # Perform the assignment
-            a.r = np.argmin(
+            a.r = np.argmax(
                 np.sum(
                     self.grouping_structure[i],
-                    axis=-1
+                    axis=0
                 )
             )
 
