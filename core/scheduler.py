@@ -181,6 +181,9 @@ class Plan(object):
         """
         # Initialize IC to 0
         self.IC = 0.0
+        # Squeeze the matrix with the grouping structure to containg only the
+        # information about assignment to a group
+        grouping_structure = np.sum(grouping_structure, axis=-1)
         # Iterate over the columns of the grouping structure
         for j in range(grouping_structure.shape[1]):
             # Avoid calculation for empty groups
@@ -194,6 +197,19 @@ class Plan(object):
                 g.minimize()
                 # Update IC
                 self.IC += g.IC
+
+    def generate_random_assignment_matrix(self):
+        """ The method generates a random assignment matrix, which might
+        generate an infeasible maintenance plan."""
+        sgm = []
+        for i in range(self.system.N):
+            x = np.zeros((self.system.N, self.system.resources))
+            x[np.random.randint(self.system.N),
+              np.random.randint(self.system.resources)] = 1
+            sgm.append(x)
+        sgm = np.stack(sgm)
+        # print(sgm)
+        return sgm
 
     def generate_structure_history(self):
         """

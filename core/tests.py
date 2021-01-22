@@ -135,13 +135,7 @@ class PlanTestCase(unittest.TestCase):
 
     def add_random_grouping(self):
         # Encode a random grouping structure in a numpy array
-        sgm = []
-        for i in range(self.system.N):
-            x = np.zeros(self.system.N)
-            x[np.random.randint(self.system.N)] = 1
-            sgm.append(x)
-        sgm = np.stack(sgm)
-        # print(sgm)
+        sgm = self.plan.generate_random_assignment_matrix()
         self.plan = Plan(
             activities=self.activities,
             system=self.system,
@@ -156,21 +150,16 @@ class PlanTestCase(unittest.TestCase):
 
     def test_group_assignment(self):
         # Encode a random grouping structure in a numpy array
-        sgm = []
-        for i in range(self.system.N):
-            x = np.zeros(self.system.N)
-            x[np.random.randint(self.system.N)] = 1
-            sgm.append(x)
-        sgm = np.stack(sgm)
-        # print(sgm)
+        sgm = self.plan.generate_random_assignment_matrix()
         # Create a copy of the plan to be modified according to the sgm
         plan_opt = Plan(
             system=copy.deepcopy(self.system),
             activities=copy.deepcopy(self.activities),
             grouping_structure=sgm,
         )
-        # print(self.plan, "\n")
-        # print(plan_opt)
+        # Squeeze the sgm to retain only the information about group assignment
+        sgm = np.sum(sgm, axis=-1)
+        # Initialize varible to check existence of at leat one group
         at_least_one_group = False
         # Compare the original plan with the new plan
         for j in range(sgm.shape[1]):
