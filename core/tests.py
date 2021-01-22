@@ -11,7 +11,9 @@ from scheduler import Activity, Group, Plan
 from utils import components, structure
 
 
+# Set seed values
 random.seed(123)
+np.random.seed(12)
 
 
 class ComponentTestCase(unittest.TestCase):
@@ -148,7 +150,7 @@ class PlanTestCase(unittest.TestCase):
 
     def test_gantt_chart(self):
         self.assertIsInstance(
-            self.plan.gantt_chart(),
+            self.plan.plot_gantt_chart(),
             plotly.graph_objs._figure.Figure
         )
 

@@ -1,8 +1,8 @@
 import copy
+import numpy as np
 import pandas as pd
 import networkx as nx
 import plotly.express as px
-import matplotlib.pyplot as plt
 
 
 class Activity(object):
@@ -138,7 +138,7 @@ class Plan(object):
             message += "{}\n".format(activity)
         return message
 
-    def gantt_chart(self):
+    def plot_gantt_chart(self):
         """
         The method returns a :class:`plotly.express.timeline` object.
         """
@@ -166,7 +166,6 @@ class Plan(object):
             x_end="End",
             y="Component",
         )
-        # gantt.show()
         return gantt
 
     def set_dates(self, grouping_structure):
