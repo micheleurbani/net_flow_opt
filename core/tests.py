@@ -169,18 +169,24 @@ class PlanTestCase(unittest.TestCase):
         )
         # print(self.plan, "\n")
         # print(plan_opt)
+        at_least_one_group = False
         # Compare the original plan with the new plan
         for j in range(sgm.shape[1]):
             # Check each column of the sgm: if there are more than one
             # activity, compare the new dates with the old ones; these should
             # differ.
             if np.sum(sgm[:, j]) > 1:
+                # The is at least one group of size > 1
+                at_least_one_group = True
                 for i in range(len(sgm[:, j])):
                     if sgm[i, j] == 1:
                         self.assertNotEqual(
                             self.plan.activities[i].t,
                             plan_opt.activities[i].t,
                         )
+        # If there is at least one group of size > 1, the IC must be > 0
+        if at_least_one_group:
+            self.assertGreater(plan_opt.IC, 0.0)
 
     def test_structure_history_generation(self):
         # Change the plan by adding a random grouping structure

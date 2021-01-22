@@ -120,12 +120,17 @@ class Plan(object):
     def __init__(self, activities, system, grouping_structure=None):
         self.activities = activities
         self.system = system
+        self.IC = 0.0
+        self.LF = self.evaluate_flow_reduction()
         if grouping_structure is not None:
             # Save the grouping structure as attribute (for future use in E/T
             # minimization)
             self.grouping_structure = grouping_structure
-            # Set activities' dates according to the grouping structure
+            # Set activities' dates according to the grouping structure.
+            # set_dates updates the IC of the plan
             self.set_dates(self.grouping_structure)
+            # Evaluate the new LF
+            self.LF = self.evaluate_flow_reduction()
 
     def __str__(self):
         message = "Plan with {} resources.\n".format(self.system.resources)
@@ -170,10 +175,13 @@ class Plan(object):
         scheduled at group date, and subsequently they are ordered according to
         group date. Finally, the trust region constrained algorithm is used to
         resolve conflicts about the use of resources.
+        The IC of the plan is updated when activities are deferred.
 
         :param np.array grouping_structure: the array encoding the assignment
         of activities to groups and to resources.
         """
+        # Initialize IC to 0
+        self.IC = 0.0
         # Iterate over the columns of the grouping structure
         for j in range(grouping_structure.shape[1]):
             # Avoid calculation for empty groups
@@ -185,6 +193,8 @@ class Plan(object):
                                 grouping_structure[i, j] == 1]
                 )
                 g.minimize()
+                # Update IC
+                self.IC += g.IC
 
     def generate_structure_history(self):
         """
