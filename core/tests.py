@@ -178,6 +178,10 @@ class PlanTestCase(unittest.TestCase):
                 nx.DiGraph
             )
 
+    def test_flow_history(self):
+        history = self.plan.generate_flow_history()
+        for config in history:
+            self.assertGreaterEqual(config["flow"], 0)
 
 if __name__ == "__main__":
     unittest.main()

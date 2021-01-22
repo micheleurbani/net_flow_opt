@@ -213,6 +213,23 @@ class Plan(object):
             )
         return history
 
+    def generate_flow_history(self):
+        """
+        The method retuns the dictionary obtained by evaluating
+        :method:`core.scheduler.generate_structure_history` enriched with the
+        value maximum flow value under the specific system configurations.
+        The maximum flow value is always calculated from source `s` to sink
+        `t`.
+        """
+        history = self.generate_structure_history()
+        for config in history:
+            config["flow"] = nx.maximum_flow_value(
+                config["structure"],
+                "s",
+                "t"
+            )
+        return history
+
     def total_flow_reduction(self):
         """
         The method returns the total reduction of flow with respect to the
