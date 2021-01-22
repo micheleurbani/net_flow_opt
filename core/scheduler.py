@@ -100,6 +100,9 @@ class Group(object):
         while diff > 1e-3:
             x.append(x[-1] - self.dH(x[-1]) / self.ddH(x[-1]))
             diff = x[-2] - x[-1]
+        # Store the extra expected cost of maintenance
+        self.IC = self.H(x[-1])
+        # Update the execution date of the activities
         for a in self.activities:
             a.t = x[-1]
 

@@ -105,6 +105,9 @@ class GroupTestCase(unittest.TestCase):
                 self.group.activities[i].t,
                 optimized_group.activities[i].t
             )
+        self.assertIsNotNone(optimized_group.IC)
+        if len(self.activities) > 1:
+            self.assertGreater(optimized_group.IC, 0.0)
 
 
 class PlanTestCase(unittest.TestCase):
@@ -204,6 +207,7 @@ class PlanTestCase(unittest.TestCase):
         history = self.plan.generate_flow_history()
         lf = self.plan.evaluate_flow_reduction()
         self.assertGreater(lf, 0)
+
 
 if __name__ == "__main__":
     unittest.main()
