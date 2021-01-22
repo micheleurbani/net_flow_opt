@@ -21,6 +21,7 @@ class Activity(object):
         self.component = component
         self.t = date
         self.d = duration
+        self.r = None
 
     def __str__(self):
         return "Component {},\tt={:.3f},\td={:.3f}.".format(id(self.component),
@@ -127,8 +128,10 @@ class Plan(object):
             # minimization)
             self.grouping_structure = grouping_structure
             # Set activities' dates according to the grouping structure.
-            # set_dates updates the IC of the plan
+            # set_dates updates also the IC of the plan.
             self.set_dates(self.grouping_structure)
+            # Assign activities to resources
+            self.set_resources()
             # Evaluate the new LF
             self.LF = self.evaluate_flow_reduction()
 
@@ -197,6 +200,19 @@ class Plan(object):
                 g.minimize()
                 # Update IC
                 self.IC += g.IC
+
+    def set_resources(self):
+        """Store the resource id in each activity."""
+        for i, a in enumerate(self.activities):
+            # Check the activity has not been assigned to a resource yet.
+            assert a.r is None
+            # Perform the assignment
+            a.r = np.argmin(
+                np.sum(
+                    self.grouping_structure[i],
+                    axis=-1
+                )
+            )
 
     def generate_random_assignment_matrix(self):
         """ The method generates a random assignment matrix, which might

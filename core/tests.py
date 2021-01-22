@@ -148,7 +148,7 @@ class PlanTestCase(unittest.TestCase):
             plotly.graph_objs._figure.Figure
         )
 
-    def test_group_assignment(self):
+    def test_set_dates(self):
         # Encode a random grouping structure in a numpy array
         sgm = self.plan.generate_random_assignment_matrix()
         # Create a copy of the plan to be modified according to the sgm
@@ -179,7 +179,13 @@ class PlanTestCase(unittest.TestCase):
         if at_least_one_group:
             self.assertGreater(plan_opt.IC, 0.0)
 
-    def test_structure_history_generation(self):
+    def test_set_activities(self):
+        # Change the plan by adding a random grouping structure
+        self.add_random_grouping()
+        for a in self.activities:
+            self.assertIsNotNone(a.r)
+
+    def test_generate_structure_history(self):
         # Change the plan by adding a random grouping structure
         self.add_random_grouping()
         history = self.plan.generate_structure_history()
@@ -191,7 +197,7 @@ class PlanTestCase(unittest.TestCase):
                 nx.DiGraph
             )
 
-    def test_flow_history(self):
+    def test_generate_flow_history(self):
         # Change the plan by adding a random grouping structure
         self.add_random_grouping()
         history = self.plan.generate_flow_history()
