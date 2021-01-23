@@ -107,6 +107,7 @@ class Group(object):
         # Update the execution date of the activities
         for a in self.activities:
             a.t = x[-1]
+        return x[-1]
 
 
 class Plan(object):
@@ -262,11 +263,9 @@ class Plan(object):
         )
         for i, a in enumerate(self.activities):
             a.t = solution.x[a.idx]
-        # original_plan.plot_gantt_chart().show()
-        # self.plot_gantt_chart().show()
 
-        self.IC = sum((a.h(a.t - original_plan.activities[a.idx].t for a in
-                       self.activities)))
+        self.IC = sum((a.h(a.t - original_plan.activities[a.idx].t) for a in
+                       self.activities))
 
     def set_resources(self):
         """Store the resource id in each activity."""
