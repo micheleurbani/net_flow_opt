@@ -6,9 +6,9 @@ import numpy as np
 import networkx as nx
 
 
-from system import Component, System
-from scheduler import Activity, Group, Plan
-from utils import components, structure
+from .system import Component, System
+from .scheduler import Activity, Group, Plan
+from .utils import components, structure
 
 
 # Set seed values

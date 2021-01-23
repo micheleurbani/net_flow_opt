@@ -2,7 +2,7 @@ import copy
 import numpy as np
 import pandas as pd
 import networkx as nx
-import plotly.express as px
+import plotly.figure_factory as ff
 from scipy.optimize import Bounds, LinearConstraint, minimize
 
 
@@ -150,9 +150,10 @@ class Plan(object):
             [
                 {
                     "Activity": str(id(a)),
-                    "Component": str(id(a.component)),
+                    "Task": "Component {}".format(a.component.idx),
                     "Start": a.t,
-                    "End": a.t + a.d,
+                    "Finish": a.t + a.d,
+                    "Resource": "Crew {}".format(a.r),
                 } for a in self.activities
             ]
         )
@@ -161,15 +162,20 @@ class Plan(object):
         # Convert float dates to datetime
         plan_data["Start"] = pd.to_datetime(plan_data["Start"] * 1e14,
                                             format="%Y-%m-%d")
-        plan_data["End"] = pd.to_datetime(plan_data["End"] * 1e14,
+        plan_data["Finish"] = pd.to_datetime(plan_data["Finish"] * 1e14,
                                           format="%Y-%m-%d")
         # Create figure
-        gantt = px.timeline(
-            data_frame=plan_data,
-            x_start="Start",
-            x_end="End",
-            y="Component",
+        gantt = ff.create_gantt(
+            plan_data,
+            index_col="Resource",
+            show_colorbar=True,
         )
+        gantt.layout.update({
+            'xaxis': {'range': [
+                '1970-01-20',
+                '1970-03-20'
+            ]}
+        })
         return gantt
 
     def set_dates(self):
@@ -254,9 +260,13 @@ class Plan(object):
             method='trust-constr',
             constraints=[linear_constraints],
         )
-        print(solution)
+        for i, a in enumerate(self.activities):
+            a.t = solution.x[a.idx]
+        # original_plan.plot_gantt_chart().show()
+        # self.plot_gantt_chart().show()
 
-        self.IC = 5.0
+        self.IC = sum((a.h(a.t - original_plan.activities[a.idx].t for a in
+                       self.activities)))
 
     def set_resources(self):
         """Store the resource id in each activity."""

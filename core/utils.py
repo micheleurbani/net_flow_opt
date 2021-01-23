@@ -1,7 +1,7 @@
 import networkx as nx
 
 
-from system import Component
+from .system import Component
 
 
 components = [
