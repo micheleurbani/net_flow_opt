@@ -164,19 +164,13 @@ class Plan(object):
         plan_data["Start"] = pd.to_datetime(plan_data["Start"] * 1e14,
                                             format="%Y-%m-%d")
         plan_data["Finish"] = pd.to_datetime(plan_data["Finish"] * 1e14,
-                                          format="%Y-%m-%d")
+                                             format="%Y-%m-%d")
         # Create figure
         gantt = ff.create_gantt(
             plan_data,
             index_col="Resource",
             show_colorbar=True,
         )
-        gantt.layout.update({
-            'xaxis': {'range': [
-                '1970-01-20',
-                '1970-03-20'
-            ]}
-        })
         return gantt
 
     def set_dates(self):
@@ -193,7 +187,8 @@ class Plan(object):
         # Initialize IC to 0
         self.IC = 0.0
         # Add index to activities
-        for i, a in enumerate(self.activities): a.idx = i
+        for i, a in enumerate(self.activities):
+            a.idx = i
         # Store a copy of the original plan
         original_plan = Plan(
             activities=copy.deepcopy(self.activities),
@@ -207,6 +202,8 @@ class Plan(object):
         # Squeeze the matrix containing the grouping structure to containg only
         # the information about assignment to a group
         grouping_structure = np.sum(self.grouping_structure, axis=-1)
+        # Empty list to store group dates
+        groups = []
         # Iterate over the columns of the grouping structure
         for j in range(grouping_structure.shape[1]):
             # Avoid calculation for empty groups
@@ -217,7 +214,17 @@ class Plan(object):
                                 range(self.system.N) if
                                 grouping_structure[i, j] == 1]
                 )
-                g.minimize()
+                groups.append(
+                    {
+                        "date": g.minimize(),
+                        "duration": max([a.d for a in g.activities]),
+                        "id_activity": g.activities[
+                            np.argmax([a.d for a in g.activities])
+                        ].idx,
+                    }
+                )
+                # Sort activities in ascending order of duration
+                g.activities.sort(key=lambda x: x.d, reverse=True)
                 # Define the constraint to guarantee the nested interval
                 if len(g.activities) > 1:
                     c = np.zeros(self.system.N)
@@ -229,41 +236,45 @@ class Plan(object):
                         ub.append(
                             g.activities[i].d - g.activities[i + 1].d
                         )
-
         ################################################
         # FORMULATE THE CONSTRAINED OPTIMIZATION PROBLEM
         ################################################
-        # Define constraints on the use of resources
-        for r in range(self.system.resources):
-            A_r = [a for a in self.activities if a.r == r]
-            if len(A_r) > 1:
-                A_r.sort(key=lambda x: x.t)
-                for i in range(len(A_r) - 1):
-                    c = np.zeros(self.system.N)
-                    c[A_r[i].idx] = 1
-                    c[A_r[i + 1].idx] = -1
-                    A.append(c)
-                    lb.append(-np.inf)
-                    ub.append(-A_r[i].d)
+        # Define constraints to avoid the superposition of groups
+        groups.sort(key=lambda x: x["date"])
+        for i in range(len(groups) - 1):
+            c = np.zeros(self.system.N)
+            c[groups[i]["id_activity"]] = 1
+            c[groups[i + 1]["id_activity"]] = -1
+            A.append(c)
+            lb.append(-1e5)
+            ub.append(-groups[i]["duration"])
         # Define the LinearConstraint objecet
         linear_constraints = LinearConstraint(
             A=np.stack(A),
             lb=np.array(lb),
             ub=np.array(ub),
         )
+        # Define variable bounds
+        bounds = Bounds(
+            lb=np.array([a.t - a.component.x_star + 1e-4 for a in
+                         original_plan.activities]),
+            ub=np.repeat(1e5, len(self.activities)),
+        )
         # Define the objective function
-        obj = lambda t: sum((a.h(t[i] - a.t) for i, a in \
-                            enumerate(original_plan.activities)))
+
+        def obj(t):
+            return sum((a.h(t[i] - a.t) for i, a in
+                        enumerate(original_plan.activities)))
         # Define and solve the problem
         solution = minimize(
             fun=obj,
             x0=[a.t for a in self.activities],
             method='trust-constr',
             constraints=[linear_constraints],
+            bounds=bounds,
         )
         for i, a in enumerate(self.activities):
             a.t = solution.x[a.idx]
-
         self.IC = sum((a.h(a.t - original_plan.activities[a.idx].t) for a in
                        self.activities))
 

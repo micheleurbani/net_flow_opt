@@ -207,7 +207,6 @@ class PlanTestCase(unittest.TestCase):
     def test_evaluate_flow_reduction(self):
         # Change the plan by adding a random grouping structure
         self.add_random_grouping()
-        history = self.plan.generate_flow_history()
         lf = self.plan.evaluate_flow_reduction()
         self.assertGreater(lf, 0)
 
