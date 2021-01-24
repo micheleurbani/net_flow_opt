@@ -180,8 +180,6 @@ class MOGA(object):
         else:
             population = [self.generate_individual_with_resources() for _ in
                           range(self.init_pop_size - 1)]
-        for i in population:
-            print(i.shape)
         population = [
             Individual(
                 plan=Plan(

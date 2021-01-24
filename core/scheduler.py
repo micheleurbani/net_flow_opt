@@ -266,6 +266,13 @@ class Plan(object):
         def obj(t):
             return sum((a.h(t[i] - a.t) for i, a in
                         enumerate(original_plan.activities)))
+
+        # Define the Jacobian of the objective function
+
+        def jacobian(t):
+            return np.array([a.dh(t[i] - a.t) for i, a in
+                             enumerate(original_plan.activities)])
+
         # Define and solve the problem
         solution = minimize(
             fun=obj,
@@ -273,6 +280,7 @@ class Plan(object):
             method='trust-constr',
             constraints=[linear_constraints],
             bounds=bounds,
+            jac=jacobian,
         )
         for i, a in enumerate(self.activities):
             a.t = solution.x[a.idx]
