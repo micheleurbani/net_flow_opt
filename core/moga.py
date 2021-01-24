@@ -1,5 +1,10 @@
 import numpy as np
 from tqdm import tqdm
+from copy import deepcopy
+from multiprocessing import Pool, cpu_count
+
+
+from .scheduler import Plan
 
 
 class Individual(object):
@@ -16,7 +21,7 @@ class Individual(object):
         self.dominated_solutions = []
         self.dominator_counter = 0
         self.rank = 0
-        self.score = None
+        self.score = np.array([self.plan.LF, self.plan.IC])
         self.crowding_distance = 0
 
     def __str__(self):
@@ -63,9 +68,8 @@ class MOGA(object):
         The method runs the algorithm until the ``stopping_criteria`` is not
         met and it returns the last generation of individuals.
         """
-        self.n_iterations = n_iterations
         # Generate the initial population
-        P = self._initial_population()
+        P = self.generate_initial_population()
         # Save the actual population for statistics
         self.population_history.append(P)
         for i in tqdm(range(self.n_generations),
@@ -95,10 +99,10 @@ class MOGA(object):
 
         .. math::
 
-            |G| \le R \qquad \\forall G \in grouping\_structure
+            |G| \\le R \\qquad \\forall G \\in grouping\\_structure
 
-            \min_{c \in G} \{t_c + d_c\} > \max_{c \in G} \{t_c\} \qquad
-            \\forall G \in grouping\_structure
+            \\min_{c \\in G} \\{t_c + d_c\\} > \\max_{c \\in G} \\{t_c\\}
+            \\qquad \\forall G \\in grouping\\_structure
 
         where :math:`G` identifies a set of components also called group, which
         ensure that the optimality of nestde intervals holds.
@@ -121,11 +125,11 @@ class MOGA(object):
                 # Sample a group from Q
                 j = np.random.randint(len(Q))
                 # Assign the component to the group
-                S1[i,Q[j]] = 1
+                S1[i, Q[j]] = 1
                 # Check if the date ranges of components in the j-th group are
                 # compatible
-                components = [c for k, c in enumerate(self.plan.activities) \
-                    if S1[k,Q[j]] == 1]
+                components = [c for k, c in enumerate(self.plan.activities)
+                              if S1[k, Q[j]] == 1]
                 max_end_date = np.max(np.array([c.t + c.d for c in
                                                 components]))
                 min_begin_date = np.min(np.array([c.t for c in components]))
@@ -134,7 +138,7 @@ class MOGA(object):
                     # the group is feasible.
                     # Check if the number of components in the group is lower
                     # than the number of available resources.
-                    if np.sum(S1[:,Q[j]]) >= self.plan.system.resources:
+                    if np.sum(S1[:, Q[j]]) >= self.plan.system.resources:
                         # The group is full, remove it from R.
                         for k, c in enumerate(R):
                             if c == Q[j]:
@@ -147,3 +151,59 @@ class MOGA(object):
                     # clear group from the local list of candidate groups
                     Q = np.delete(Q, j)
         return S
+
+    def generate_individual_with_resources(self):
+        S = self.generate_individual()
+        assert type(S) is np.ndarray
+        x = []
+        for i in range(S.shape[0]):
+            c = np.zeros((self.plan.N, self.plan.system.resources))
+            c[:, np.random.randint(self.plan.system.resources)] = S[i, :]
+            x.append(c)
+        S = np.stack(x)
+        return S
+
+    def generate_initial_population(self):
+        """
+        Generate an initial population of :class:`core.moga.Individual`
+        objects.
+
+        :return: a list of :class:`Individual` objects.
+
+        """
+        if self.parallel:
+            with Pool(processes=cpu_count()) as pool:
+                population = pool.map(
+                    self.generate_individual_with_resources,
+                    range(self.init_pop_size - 1)
+                )
+        else:
+            population = [self.generate_individual_with_resources() for _ in
+                          range(self.init_pop_size - 1)]
+        for i in population:
+            print(i.shape)
+        population = [
+            Individual(
+                plan=Plan(
+                    system=self.plan.system,
+                    activities=deepcopy(self.plan.activities),
+                    grouping_structure=s
+                )
+            ) for s in population
+        ]
+        # Remember to inject artificially the solution with all the activities
+        # executed separately.
+        S = np.zeros(shape=(self.plan.N, self.plan.N,
+                            self.plan.system.resources), dtype=int)
+        for i in range(self.plan.N):
+            S[i, i, np.random.randint(self.plan.system.resources)] = 1
+        population.append(
+            Individual(
+                plan=Plan(
+                    system=self.plan.system,
+                    activities=deepcopy(self.plan.activities),
+                    grouping_structure=S,
+                )
+            )
+        )
+        return population

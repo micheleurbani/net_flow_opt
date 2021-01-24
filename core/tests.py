@@ -8,7 +8,7 @@ import networkx as nx
 
 from .system import Component, System
 from .scheduler import Activity, Group, Plan
-from .moga import MOGA
+from .moga import MOGA, Individual
 from .utils import components, structure
 
 
@@ -254,6 +254,24 @@ class MOGATestCase(unittest.TestCase):
                 self.system.resources,
                 sum(individual[:, j])
             )
+        # TODO: remember to test also with parallel=True
+
+    def test_generate_individual_with_resources(self):
+        individual = self.moga.generate_individual_with_resources()
+        for i in range(individual.shape[0]):
+            self.assertEqual(np.sum(individual[i, :, :]), 1)
+        for j in range(individual.shape[1]):
+            self.assertGreaterEqual(
+                self.system.resources,
+                np.sum(individual[:, j])
+            )
+
+    def test_generate_initial_population(self):
+        population = self.moga.generate_initial_population()
+        self.assertIsNotNone(population)
+        self.assertIsInstance(population, list)
+        for i in population:
+            self.assertIsInstance(i, Individual)
 
 
 if __name__ == "__main__":

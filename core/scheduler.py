@@ -296,8 +296,8 @@ class Plan(object):
         """ The method generates a random assignment matrix, which might
         generate an infeasible maintenance plan."""
         sgm = []
-        for i in range(self.system.N):
-            x = np.zeros((self.system.N, self.system.resources))
+        for i in range(self.N):
+            x = np.zeros((self.N, self.system.resources))
             x[np.random.randint(self.system.N),
               np.random.randint(self.system.resources)] = 1
             sgm.append(x)
