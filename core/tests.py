@@ -289,8 +289,12 @@ class MOGATestCase(unittest.TestCase):
 
     def test_fast_non_dominated_sort(self):
         population = self.moga.generate_initial_population()
-        for i in population:
-            print(i)
+        fronts = self.moga._fast_non_dominated_sort(population)
+        # for i, f in enumerate(fronts):
+        #     print('Front {}'.format(i))
+        #     for i in f:
+        #         print(i)
+        self.assertGreaterEqual(len(fronts[0]), 1)
 
 if __name__ == "__main__":
     unittest.main()
