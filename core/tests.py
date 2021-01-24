@@ -289,12 +289,27 @@ class MOGATestCase(unittest.TestCase):
 
     def test_fast_non_dominated_sort(self):
         population = self.moga.generate_initial_population()
-        fronts = self.moga._fast_non_dominated_sort(population)
+        fronts = self.moga.fast_non_dominated_sort(population)
         # for i, f in enumerate(fronts):
         #     print('Front {}'.format(i))
         #     for i in f:
         #         print(i)
         self.assertGreaterEqual(len(fronts[0]), 1)
+
+    def test_crowding_distance(self):
+        population = self.moga.generate_initial_population()
+        fronts = self.moga.fast_non_dominated_sort(population)
+        for front in fronts:
+            self.moga.crowding_distance(front)
+            self.assertEqual(
+                front[0].score[0],
+                max((i.score[0] for i in front))
+            )
+            self.assertEqual(
+                front[-1].score[1],
+                max((i.score[1] for i in front))
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

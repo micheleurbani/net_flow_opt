@@ -6,7 +6,6 @@ from multiprocessing import Pool, cpu_count
 
 
 from .scheduler import Group, Plan
-from .exceptions import InfeasibleGroup
 
 
 class Individual(object):
@@ -51,7 +50,7 @@ class Individual(object):
                     # and screen the possible groups using the number of
                     # resources
                     if j != g_id and np.sum(x[:, j, :]) < \
-                        individual.plan.system.resources:
+                            individual.plan.system.resources:
                         g.append(j)
                 # Further screen the groups on feasibility
                 f = []
@@ -271,7 +270,7 @@ class MOGA(object):
                          for individual in parents]
         return offspring
 
-    def _fast_non_dominated_sort(self, population):
+    def fast_non_dominated_sort(self, population):
         """
         Apply the fast non-dominated sort algorithm as in Deb et al. [1]_.
 
@@ -292,7 +291,8 @@ class MOGA(object):
         for p in population:
             for q in population:
                 if p.score[0] < q.score[0] and p.score[1] < q.score[1]:
-                    # p dominates q, add q to the set of solutions dominated by p
+                    # p dominates q, add q to the set of solutions dominated
+                    # by p
                     p.dominatedSolutions.append(q)
                 elif p.score[0] > q.score[0] and p.score[1] > q.score[1]:
                     # p is dominated by q, increment the dominator counter of p
@@ -314,3 +314,36 @@ class MOGA(object):
         if not frontiers[-1]:
             del frontiers[-1]
         return frontiers
+
+    def crowding_distance(self, front):
+        """
+        Given a front - i.e., a set of individuals with the same rank - for
+        each individual, the method calculates the crowding distance, which is
+        appended to the individual's attribute.
+
+        :param list population: a list of individuals.
+        :return: the list of individuals in ascending order of crowding
+        distance indicator.
+        :rtype: list
+
+        """
+        # Initialize distance
+        for ind in front:
+            ind.crowding_distance = 0
+
+        for m in range(2):
+            # Sort using each objective value
+            front.sort(key=lambda i: i.score[m])
+            # Assign an infinite distance value to the extreme points
+            front[0].crowding_distance = np.inf
+            front[-1].crowding_distance = np.inf
+            # Find the minimum and maximum value of the m-th objective
+            m_values = [ind.score[m] for ind in front]
+            m_min, m_max = min(m_values), max(m_values)
+            # Crowding distance update
+            for i in range(1, len(front) - 1):
+                front[i].crowding_distance += (front[i+1].score[m] -
+                                               front[i-1].score[m]) / \
+                                                   (m_max - m_min)
+
+        return sorted(front, key=lambda x: x.crowding_distance, reverse=True)
