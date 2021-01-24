@@ -8,6 +8,7 @@ import networkx as nx
 
 from .system import Component, System
 from .scheduler import Activity, Group, Plan
+from .moga import MOGA
 from .utils import components, structure
 
 
@@ -209,6 +210,50 @@ class PlanTestCase(unittest.TestCase):
         self.add_random_grouping()
         lf = self.plan.evaluate_flow_reduction()
         self.assertGreater(lf, 0)
+
+
+class IndividualTestCase(unittest.TestCase):
+
+    def setUp(self):
+        pass
+
+
+class MOGATestCase(unittest.TestCase):
+
+    def setUp(self):
+        # Create one maintenance activity per component
+        self.activities = [
+            Activity(
+                component=c,
+                date=c.x_star,
+                duration=random.random() * 3 + 1
+            ) for c in components
+        ]
+        self.system = System(
+            structure=structure,
+            resources=3,
+            components=components
+        )
+        self.plan = Plan(
+            activities=self.activities,
+            system=self.system,
+        )
+        self.moga = MOGA(
+            init_pop_size=5,
+            p_mutation=0.1,
+            n_generations=5,
+            maintenance_plan=self.plan,
+        )
+
+    def test_generate_individual(self):
+        individual = self.moga.generate_individual()
+        for i in range(individual.shape[0]):
+            self.assertEqual(sum(individual[i, :]), 1)
+        for j in range(individual.shape[1]):
+            self.assertGreaterEqual(
+                self.system.resources,
+                sum(individual[:, j])
+            )
 
 
 if __name__ == "__main__":

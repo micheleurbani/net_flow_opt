@@ -125,6 +125,7 @@ class Plan(object):
         self.system = system
         self.IC = 0.0
         self.LF = self.evaluate_flow_reduction()
+        self.N = len(self.activities)
         if grouping_structure is not None:
             # Save the grouping structure as attribute (for future use in E/T
             # minimization)
