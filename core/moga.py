@@ -1,10 +1,12 @@
 import numpy as np
 from tqdm import tqdm
 from copy import deepcopy
+from itertools import repeat
 from multiprocessing import Pool, cpu_count
 
 
-from .scheduler import Plan
+from .scheduler import Group, Plan
+from .exceptions import InfeasibleGroup
 
 
 class Individual(object):
@@ -32,6 +34,49 @@ class Individual(object):
         else:
             return "Individual, score: {}, rank: {}, cd: {}."\
                 .format(self.score, self.rank, self.crowding_distance)
+
+    @staticmethod
+    def mutate(individual, p_mutation):
+        """
+        The method is used to parallelize the mutation process of a population.
+        It returns a newly generated individual.
+        """
+        x = deepcopy(individual.plan.grouping_structure)
+        for i in range(x.shape[0]):               # Loop among components
+            if np.random.rand() < p_mutation:     # Sample mutation probability
+                g = []                            # List of candidate groups
+                g_id = np.flatnonzero(np.sum(x[i, :, :], axis=0))[0]
+                for j in range(x.shape[1]):
+                    # Avoid to check the component against itself
+                    # and screen the possible groups using the number of
+                    # resources
+                    if j != g_id and np.sum(x[:, j, :]) < \
+                        individual.plan.system.resources:
+                        g.append(j)
+                # Further screen the groups on feasibility
+                f = []
+                for j in g:
+                    activities = [
+                            individual.plan.activities[c] for c in
+                            np.flatnonzero(np.sum(x[:, j, :], axis=1))
+                        ] + [individual.plan.activities[i]]
+                    group = Group(activities=activities)
+                    if group.is_feasible():
+                        # Group is feasible update f
+                        f.append(j)
+                allele = np.zeros((individual.plan.N,
+                                  individual.plan.system.resources), dtype=int)
+                allele[np.random.choice(f),
+                       np.random.randint(individual.plan.system.resources)] = 1
+                x[i, :, :] = allele
+        individual = Individual(
+            plan=Plan(
+                activities=deepcopy(individual.plan.activities),
+                system=deepcopy(individual.plan.system),
+                grouping_structure=x,
+            )
+        )
+        return individual
 
 
 class MOGA(object):
@@ -75,7 +120,7 @@ class MOGA(object):
         for i in tqdm(range(self.n_generations),
                       desc="MOGA execution", ncols=100):
             # Generate the offspring population Q by mutation
-            Q = self._mutation(P)
+            Q = self.mutation(P)
             population = self._score(population=P+Q)
             # Perform fast non-dominated sort
             fronts = self._fast_non_dominated_sort(population)
@@ -205,3 +250,24 @@ class MOGA(object):
             )
         )
         return population
+
+    def mutation(self, parents):
+        """
+        The method returns a population of mutated individuals.
+        The procedure parallel processes the individuals in parents.
+
+        :param list parents: a list of individuals that are used to generate
+        the off spring.
+        :return: a list of mutated individuals.
+
+        """
+        if self.parallel:
+            with Pool(processes=cpu_count()) as pool:
+                offspring = pool.starmap(
+                    Individual.mutate,
+                    zip(parents, repeat(self.p_mutation, len(parents)))
+                )
+        else:
+            offspring = [Individual.mutate(individual, self.p_mutation)
+                         for individual in parents]
+        return offspring

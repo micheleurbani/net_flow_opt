@@ -290,8 +290,6 @@ class Plan(object):
     def set_resources(self):
         """Store the resource id in each activity."""
         for i, a in enumerate(self.activities):
-            # Check the activity has not been assigned to a resource yet.
-            assert a.r is None
             # Perform the assignment
             a.r = np.argmax(
                 np.sum(

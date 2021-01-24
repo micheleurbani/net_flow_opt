@@ -273,6 +273,19 @@ class MOGATestCase(unittest.TestCase):
         for i in population:
             self.assertIsInstance(i, Individual)
 
+    def test_mutation(self):
+        sgm = self.moga.generate_individual_with_resources()
+        individual = Individual(
+            plan=Plan(
+                activities=self.activities,
+                system=self.system,
+                grouping_structure=sgm,
+            )
+        )
+        # Change p_mutation to be sure the mutation to occure
+        self.moga.p_mutation = 1
+        mutated = self.moga.mutation([individual])[0]
+        self.assertFalse(np.all(sgm == mutated.plan.grouping_structure))
 
 if __name__ == "__main__":
     unittest.main()
