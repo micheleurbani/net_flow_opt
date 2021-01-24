@@ -287,5 +287,10 @@ class MOGATestCase(unittest.TestCase):
         mutated = self.moga.mutation([individual])[0]
         self.assertFalse(np.all(sgm == mutated.plan.grouping_structure))
 
+    def test_fast_non_dominated_sort(self):
+        population = self.moga.generate_initial_population()
+        for i in population:
+            print(i)
+
 if __name__ == "__main__":
     unittest.main()

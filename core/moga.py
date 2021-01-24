@@ -121,9 +121,8 @@ class MOGA(object):
                       desc="MOGA execution", ncols=100):
             # Generate the offspring population Q by mutation
             Q = self.mutation(P)
-            population = self._score(population=P+Q)
             # Perform fast non-dominated sort
-            fronts = self._fast_non_dominated_sort(population)
+            fronts = self.fast_non_dominated_sort(P+Q)
             # Create the new generation
             P = []
             for f in fronts:
@@ -271,3 +270,47 @@ class MOGA(object):
             offspring = [Individual.mutate(individual, self.p_mutation)
                          for individual in parents]
         return offspring
+
+    def _fast_non_dominated_sort(self, population):
+        """
+        Apply the fast non-dominated sort algorithm as in Deb et al. [1]_.
+
+        :param list population: a list of :class:`Individual` objects.
+        :return: a list of lists; each list represents a front, and fronts are
+        returned in ascending order (from the best to the worst).
+
+        """
+
+        # Initialize the list of individuals
+        frontiers = [[]]
+        # Clean the population
+        for i in population:
+            i.rank = 0
+            i.dominatorCounter = 0
+            i.dominatedSolutions = list()
+        # Start the algorithm
+        for p in population:
+            for q in population:
+                if p.score[0] < q.score[0] and p.score[1] < q.score[1]:
+                    # p dominates q, add q to the set of solutions dominated by p
+                    p.dominatedSolutions.append(q)
+                elif p.score[0] > q.score[0] and p.score[1] > q.score[1]:
+                    # p is dominated by q, increment the dominator counter of p
+                    p.dominatorCounter += 1
+            if p.dominatorCounter == 0:
+                p.rank = 1
+                frontiers[0].append(p)
+        i = 0
+        while frontiers[i]:
+            Q = list()
+            for p in frontiers[i]:
+                for q in p.dominatedSolutions:
+                    q.dominatorCounter -= 1
+                    if q.dominatorCounter == 0:
+                        q.rank = i + 2
+                        Q.append(q)
+            i += 1
+            frontiers.append(Q)
+        if not frontiers[-1]:
+            del frontiers[-1]
+        return frontiers
