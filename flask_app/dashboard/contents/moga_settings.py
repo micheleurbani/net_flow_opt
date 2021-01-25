@@ -111,7 +111,7 @@ generations = dbc.FormGroup(
 graph_loader = dcc.Loading(
     id="loading-1",
     children=[
-        html.Div(id="hidden-div2", style={"display":"none"})
+        html.Div(id="hidden-div2", style={"display": "none"})
         ],
     type="default")
 
@@ -138,18 +138,17 @@ form = dbc.Form([
 
 moga_settings_contents = html.Div(form)
 
+
 def moga_settings_callbacks(app):
     @app.callback(
-        [Output('pareto-front', 'figure'),
-        Output('hv_indicator', 'figure'),
-        Output('hidden-div2', 'children')],
+        [Output('hidden-div2', 'children')],
         Input('start-algorithm', 'n_clicks'),
         [State('experiment-name-input', 'value'),
-        State('population-size-input', 'value'),
-        State('seed-input', 'value'),
-        State('p_mutation-input', 'value'),
-        State('resources-input', 'value'),
-        State('generations-input', 'value')]
+         State('population-size-input', 'value'),
+         State('seed-input', 'value'),
+         State('p_mutation-input', 'value'),
+         State('resources-input', 'value'),
+         State('generations-input', 'value')]
     )
     def run_algorithm(
         n_clicks,
@@ -171,7 +170,7 @@ def moga_settings_callbacks(app):
         seed = int(seed)
         p_mutation = int(p_mutation)/100
         resources = int(resources)
-        generations = int(n_generations)
+        n_generations = int(n_generations)
 
         # Declare the system
         network_system = System(
@@ -192,11 +191,13 @@ def moga_settings_callbacks(app):
             p_mutation=p_mutation,
             n_generations=n_generations,
             maintenance_plan=plan,
+            parallel=True,
         )
+        ga.run()
 
         if not experiment_name:
             experiment_name = "experiment_" + \
                 datetime.now().strftime("%Y%m%d_%H%M%S") + ".pkl"
         ga.save(fname=experiment_name)
 
-        return {}, {}, 'waiting'
+        return ['waiting']

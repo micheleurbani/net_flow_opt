@@ -4,9 +4,8 @@ import dash_bootstrap_components as dbc
 
 from .layout import html_layout
 from .contents.overview import overview
-from .contents.components import components_contents
 from .contents.solution_analysis import (solution_analysis_contents,
-                                        solution_analysis_callbacks)
+                                         solution_analysis_callbacks)
 from .contents.moga_settings import (moga_settings_contents,
                                      moga_settings_callbacks)
 
@@ -17,7 +16,8 @@ def init_dashboard(server):
         server=server,
         routes_pathname_prefix='/dashapp/',
         external_stylesheets=[
-            'https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css',
+            'https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/' +
+            'dist/css/bootstrap.min.css',
         ]
     )
 
@@ -47,6 +47,7 @@ def init_dashboard(server):
     init_callbacks(dash_app)
 
     return dash_app.server
+
 
 def init_callbacks(app):
     moga_settings_callbacks(app)
