@@ -157,6 +157,14 @@ def solution_analysis_callbacks(app, cache):
             ga = MOGAResults(load(f))
         return ga
 
+    @cache.memoize()
+    def load_last_generation(model_name):
+        with open('results/' + model_name, 'rb') as f:
+            ga = MOGAResults(load(f))
+        last_generation = ga.moga.population_history[-1]
+        original_plan = ga.moga.plan
+        return original_plan, last_generation
+
     @app.callback(
         Output("div-pareto", "children"),
         [Input("models-dropdown", "value"),
@@ -166,8 +174,6 @@ def solution_analysis_callbacks(app, cache):
         # Load the MOGA object from the file
         if not model_name or not plot_type:
             raise PreventUpdate
-        # with open('results/' + model_name, 'rb') as f:
-        #     ga = MOGAResults(load(f))
         ga = load_data(model_name)
 
         if plot_type == "pfront":
@@ -185,3 +191,54 @@ def solution_analysis_callbacks(app, cache):
             return []
         else:
             return solution_layout
+
+    @app.callback(
+        Output("solution-dropdown", "options"),
+        Input("pareto-plot", "figure")
+    )
+    def load_solutions_dropdown(figure):
+        return [{'label': "Plan ID: {}".format(figure['data'][0]
+                ['hovertext'][i]), 'value': figure['data'][0]['hovertext'][i]}
+                for i, y in enumerate(figure['data'][0]['y']) if y is not None]
+
+    @app.callback(
+        [Output("gantt-chart-div", "children"),
+         Output("flow-plot-div", "children")],
+        [Input("solution-dropdown", "value"),
+         Input("solution-type", "value"),
+         Input("models-dropdown", "value")]
+    )
+    def load_solution_layout(solution_id, solution_type, model_name):
+        if solution_id is None or solution_type is None:
+            raise PreventUpdate
+        plan, population = load_last_generation(model_name)
+        if solution_type == "PM":
+            gantt = [
+                dcc.Graph(
+                    id="gantt-chart",
+                    figure=plan.plot_gantt_chart()
+                )
+            ]
+            flow = [
+                dcc.Graph(
+                    id="flow-plot",
+                    figure=plan.plot_flow_history()
+                )
+            ]
+            return gantt, flow
+        elif solution_type == "optim":
+            gantt = [
+                dcc.Graph(
+                    id="gantt-chart",
+                    figure=population[solution_id].plan.plot_gantt_chart()
+                )
+            ]
+            flow = [
+                dcc.Graph(
+                    id="flow-plot",
+                    figure=population[solution_id].plan.plot_flow_history()
+                )
+            ]
+            return gantt, flow
+        else:
+            return [], []

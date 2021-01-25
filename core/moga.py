@@ -408,6 +408,7 @@ class MOGAResults(object):
             data_frame=df,
             x="LF",
             y="IC",
+            hover_name="ID",
         )
         return fig
 

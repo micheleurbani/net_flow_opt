@@ -2,6 +2,7 @@ import copy
 import numpy as np
 import pandas as pd
 import networkx as nx
+from plotly.graph_objects import Figure, Scatter
 import plotly.figure_factory as ff
 from scipy.optimize import Bounds, LinearConstraint, minimize
 
@@ -173,6 +174,21 @@ class Plan(object):
             show_colorbar=True,
         )
         return gantt
+
+    def plot_flow_history(self):
+        """ Return a Plotly Dash figure object representing the flow value as
+        a function of time."""
+        history = self.generate_flow_history()
+        df = pd.DataFrame(history)
+        fig = Figure()
+        fig.add_trace(
+            Scatter(
+                x=df.date,
+                y=df.flow,
+                line_shape="hv",
+            )
+        )
+        return fig
 
     def set_dates(self):
         """
