@@ -2,8 +2,10 @@ import numpy as np
 from tqdm import tqdm
 from pickle import dump
 from copy import deepcopy
+from pandas import DataFrame
 from itertools import repeat
 from os import listdir, mkdir
+from plotly.express import scatter
 from multiprocessing import Pool, cpu_count
 
 
@@ -366,3 +368,59 @@ class MOGA(object):
         # Save object
         with open("results/{}".format(fname), "wb") as f:
             dump(self, f)
+
+
+class MOGAResults(object):
+
+    def __init__(self, moga):
+        self.moga = moga
+
+    def __str__(self):
+        return "MOGA: {} generations with {} individuals and {} resources"\
+            .format(
+                len(self.moga.population_history),
+                self.moga.init_pop_size,
+                self.moga.plan.system.resources
+            )
+
+    def to_dataframe(self):
+        df = []
+        for generation, population in enumerate(self.moga.population_history):
+            for i in population:
+                df.append(
+                    {
+                        "LF": i.plan.LF,
+                        "IC": i.plan.IC,
+                        "rank": i.rank,
+                        "generation": generation,
+                    }
+                )
+        df = DataFrame(df)
+        return df
+
+    def pareto_front(self):
+        """Returns a scatter plot representig the Pareto front of the last
+        generation."""
+        df = self.to_dataframe()
+        df = df[df.generation == df.generation.max()]
+        fig = scatter(
+            data_frame=df,
+            x="LF",
+            y="IC",
+        )
+        return fig
+
+    def pareto_evolution(self):
+        """Returns an animation showing the evolution of the population."""
+        df = self.to_dataframe()
+        df["is_pareto"] = df["rank"] == 1
+        fig = scatter(
+            data_frame=df,
+            x="LF",
+            y="IC",
+            color="is_pareto",
+            animation_frame="generation",
+            range_x=(df.LF.min() * 0.95, df.LF.max() * 1.05),
+            range_y=(df.IC.min() - 1, df.IC.max() + 2),
+        )
+        return fig
