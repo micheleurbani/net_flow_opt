@@ -1,7 +1,9 @@
 import numpy as np
 from tqdm import tqdm
+from pickle import dump
 from copy import deepcopy
 from itertools import repeat
+from os import listdir, mkdir
 from multiprocessing import Pool, cpu_count
 
 
@@ -125,7 +127,7 @@ class MOGA(object):
             # Create the new generation
             P = []
             for f in fronts:
-                f = self._crowding_distance(f)
+                f = self.crowding_distance(f)
                 if len(P) + len(f) < self.init_pop_size:
                     P += f
                 else:
@@ -347,3 +349,20 @@ class MOGA(object):
                                                    (m_max - m_min)
 
         return sorted(front, key=lambda x: x.crowding_distance, reverse=True)
+
+    def save(self, fname):
+        """
+        Pickle the object and save it in the folder results with name 'fname'.
+        """
+        if "results" not in listdir():
+            mkdir("results")
+        # Check if the name ends with .pkl extension, else add it.
+        x = fname.find(".")
+        if x == -1:
+            fname += ".pkl"
+        elif fname[x:] != ".pkl":
+            raise ValueError("The name of the file is incorrect, please \
+                                check its extension.")
+        # Save object
+        with open("results/{}".format(fname), "wb") as f:
+            dump(self, f)

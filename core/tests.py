@@ -309,6 +309,19 @@ class MOGATestCase(unittest.TestCase):
                 front[-1].score[1],
                 max((i.score[1] for i in front))
             )
+            for individual in front:
+                self.assertIsNotNone(individual.crowding_distance)
+
+    def test_run(self):
+        self.moga.run()
+        # Verify the number of generations
+        self.assertEqual(
+            len(self.moga.population_history),
+            self.moga.n_generations + 1,
+        )
+        # Check the number of individuals in each generation
+        for gen in self.moga.population_history:
+            self.assertEqual(len(gen), self.moga.init_pop_size)
 
 
 if __name__ == "__main__":
