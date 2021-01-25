@@ -180,10 +180,11 @@ class Plan(object):
         a function of time."""
         history = self.generate_flow_history()
         df = pd.DataFrame(history)
+        # Change real values used for dates with datetime strings
         fig = Figure()
         fig.add_trace(
             Scatter(
-                x=df.date,
+                x=pd.to_datetime(df["date"] * 1e14, format="%Y-%m-%d"),
                 y=df.flow,
                 line_shape="hv",
             )
@@ -341,8 +342,6 @@ class Plan(object):
         # Gather events' dates
         history = [{"date": a.t} for a in self.activities] + \
             [{"date": a.t + a.d} for a in self.activities]
-        # Add the start date at time 0
-        history.append({"date": 0.0})
         # Sort events in ascending order of date
         history.sort(key=lambda a: a["date"])
         # Iterate over all events to find the set of non-active nodes
