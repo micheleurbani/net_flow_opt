@@ -126,18 +126,37 @@ pareto_front = html.Div(
     className="container",
 )
 
+gantt_chart = html.Div(
+    id="gantt-chart-div",
+    className="container",
+)
+
+flow_plot = html.Div(
+    id="flow-plot-div",
+    className="container",
+)
+
 solution_analysis_contents = html.Div(
     id="solution_analysis_contents",
     children=[
         load_model,
         pareto_front,
         load_solution,
+        gantt_chart,
+        flow_plot,
     ],
     className="container",
 )
 
 
-def solution_analysis_callbacks(app):
+def solution_analysis_callbacks(app, cache):
+
+    @cache.memoize()
+    def load_data(model_name):
+        with open('results/' + model_name, 'rb') as f:
+            ga = MOGAResults(load(f))
+        return ga
+
     @app.callback(
         Output("div-pareto", "children"),
         [Input("models-dropdown", "value"),
@@ -147,8 +166,9 @@ def solution_analysis_callbacks(app):
         # Load the MOGA object from the file
         if not model_name or not plot_type:
             raise PreventUpdate
-        with open('results/' + model_name, 'rb') as f:
-            ga = MOGAResults(load(f))
+        # with open('results/' + model_name, 'rb') as f:
+        #     ga = MOGAResults(load(f))
+        ga = load_data(model_name)
 
         if plot_type == "pfront":
             return [dcc.Graph(id="pareto-plot", figure=ga.pareto_front())]

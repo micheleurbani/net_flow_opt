@@ -1,11 +1,13 @@
 """Initialize Flask app."""
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
+from flask_sqlalchemy import SQLAlchemy
+from flask_caching import Cache
 
 
 db = SQLAlchemy()
 login_manager = LoginManager()
+cache = Cache()
 
 
 def init_app():
@@ -17,6 +19,7 @@ def init_app():
     # Initialize plugins
     db.init_app(app)
     login_manager.init_app(app)
+    cache.init_app(app)
 
     with app.app_context():
         # Import parts of our core Flask app
@@ -31,6 +34,6 @@ def init_app():
 
         # Import Dash application
         from .dashboard.dashboard import init_dashboard
-        app = init_dashboard(app)
+        app = init_dashboard(app, cache)
 
         return app
