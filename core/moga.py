@@ -386,13 +386,14 @@ class MOGAResults(object):
     def to_dataframe(self):
         df = []
         for generation, population in enumerate(self.moga.population_history):
-            for i in population:
+            for idx, i in enumerate(population):
                 df.append(
                     {
                         "LF": i.plan.LF,
                         "IC": i.plan.IC,
                         "rank": i.rank,
                         "generation": generation,
+                        "ID": idx,
                     }
                 )
         df = DataFrame(df)
