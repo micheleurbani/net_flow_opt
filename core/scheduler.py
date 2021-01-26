@@ -274,7 +274,7 @@ class Plan(object):
         )
         # Define variable bounds
         bounds = Bounds(
-            lb=np.array([a.t - a.component.x_star + 1e-4 for a in
+            lb=np.array([a.t - a.component.x_star + 1e-3 for a in
                          original_plan.activities]),
             ub=np.repeat(1e5, len(self.activities)),
         )
@@ -299,7 +299,7 @@ class Plan(object):
             bounds=bounds,
             jac=jacobian,
         )
-        for i, a in enumerate(self.activities):
+        for a in self.activities:
             a.t = solution.x[a.idx]
         self.IC = sum((a.h(a.t - original_plan.activities[a.idx].t) for a in
                        self.activities))

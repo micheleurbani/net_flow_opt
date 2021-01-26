@@ -3,6 +3,7 @@ venv/
 .vscode/
 __*/
 cached_data/
+results/
 
 # Files
 .env

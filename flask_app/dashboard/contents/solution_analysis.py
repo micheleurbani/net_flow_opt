@@ -184,10 +184,10 @@ def solution_analysis_callbacks(app, cache):
 
     @app.callback(
         Output("load-solution-input", "children"),
-        Input("pareto-plot", "figure")
+        Input("pareto-dropdown", "value")
     )
-    def load_solution_layout(figure):
-        if figure is None:
+    def load_solution_layout(pareto_type):
+        if pareto_type is None or pareto_type == "pevo":
             return []
         else:
             return solution_layout

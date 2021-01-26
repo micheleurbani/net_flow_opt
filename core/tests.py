@@ -243,6 +243,7 @@ class MOGATestCase(unittest.TestCase):
             p_mutation=0.1,
             n_generations=5,
             maintenance_plan=self.plan,
+            parallel=True,
         )
 
     def test_generate_individual(self):
@@ -274,18 +275,23 @@ class MOGATestCase(unittest.TestCase):
             self.assertIsInstance(i, Individual)
 
     def test_mutation(self):
-        sgm = self.moga.generate_individual_with_resources()
-        individual = Individual(
-            plan=Plan(
-                activities=self.activities,
-                system=self.system,
-                grouping_structure=sgm,
-            )
-        )
-        # Change p_mutation to be sure the mutation to occure
         self.moga.p_mutation = 1
-        mutated = self.moga.mutation([individual])[0]
-        self.assertFalse(np.all(sgm == mutated.plan.grouping_structure))
+        population = []
+        for i in range(100):
+            sgm = self.moga.generate_individual_with_resources()
+            individual = Individual(
+                plan=Plan(
+                    activities=copy.deepcopy(self.activities),
+                    system=self.system,
+                    grouping_structure=sgm,
+                )
+            )
+            population.append(individual)
+        # Change p_mutation to be sure the mutation to occure
+        mutated = self.moga.mutation(population)
+        for i in mutated:
+            self.assertFalse(np.all(i == i.plan.grouping_structure))
+        self.moga.p_mutation = 0.2
 
     def test_fast_non_dominated_sort(self):
         population = self.moga.generate_initial_population()

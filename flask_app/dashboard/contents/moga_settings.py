@@ -8,6 +8,7 @@ from dash.exceptions import PreventUpdate
 from dash.dependencies import Input, Output, State
 
 
+from .solution_analysis import load_models
 from core.moga import MOGA
 from core.system import System
 from core.scheduler import Activity, Plan
@@ -141,7 +142,8 @@ moga_settings_contents = html.Div(form)
 
 def moga_settings_callbacks(app):
     @app.callback(
-        [Output('hidden-div2', 'children')],
+        [Output('hidden-div2', 'children'),
+         Output('models-dropdown', 'options')],
         Input('start-algorithm', 'n_clicks'),
         [State('experiment-name-input', 'value'),
          State('population-size-input', 'value'),
@@ -200,4 +202,4 @@ def moga_settings_callbacks(app):
                 datetime.now().strftime("%Y%m%d_%H%M%S") + ".pkl"
         ga.save(fname=experiment_name)
 
-        return ['waiting']
+        return ['waiting'], load_models()

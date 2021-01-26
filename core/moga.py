@@ -199,7 +199,7 @@ class MOGA(object):
                     Q = np.delete(Q, j)
         return S
 
-    def generate_individual_with_resources(self):
+    def generate_individual_with_resources(self, i=None):
         S = self.generate_individual()
         assert type(S) is np.ndarray
         x = []

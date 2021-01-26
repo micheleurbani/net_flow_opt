@@ -8,9 +8,8 @@ html_layout = """
             {%css%}
         </head>
         <body class="dash-template">
-            <nav class="site-header sticky-top py-1">
-                <div class="container d-flex flex-column flex-md-row justify-\
-                    content-between">
+            <nav class="navbar expand-lg navbar-light bg-light">
+                <div class="container fluid">
                     <a class="navbar-brand" href="/">NetFlowOpt</a>
                     <form class="d-flex">
                         <a class="btn btn-primary" href="/" role="button">\
