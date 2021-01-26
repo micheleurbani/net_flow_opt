@@ -141,6 +141,7 @@ class PlanTestCase(unittest.TestCase):
             activities=self.activities,
             system=self.system,
             grouping_structure=sgm,
+            original_plan=self.plan,
         )
 
     def test_gantt_chart(self):
@@ -157,6 +158,7 @@ class PlanTestCase(unittest.TestCase):
             system=copy.deepcopy(self.system),
             activities=copy.deepcopy(self.activities),
             grouping_structure=sgm,
+            original_plan=self.plan,
         )
         # Squeeze the sgm to retain only the information about group assignment
         sgm = np.sum(sgm, axis=-1)
@@ -277,13 +279,14 @@ class MOGATestCase(unittest.TestCase):
     def test_mutation(self):
         self.moga.p_mutation = 1
         population = []
-        for i in range(100):
+        for i in range(20):
             sgm = self.moga.generate_individual_with_resources()
             individual = Individual(
                 plan=Plan(
                     activities=copy.deepcopy(self.activities),
                     system=self.system,
                     grouping_structure=sgm,
+                    original_plan=self.plan,
                 )
             )
             population.append(individual)

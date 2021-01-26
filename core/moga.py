@@ -39,7 +39,7 @@ class Individual(object):
                 .format(self.score, self.rank, self.crowding_distance)
 
     @staticmethod
-    def mutate(individual, p_mutation):
+    def mutate(individual, p_mutation, original_plan):
         """
         The method is used to parallelize the mutation process of a population.
         It returns a newly generated individual.
@@ -77,6 +77,7 @@ class Individual(object):
                 activities=deepcopy(individual.plan.activities),
                 system=deepcopy(individual.plan.system),
                 grouping_structure=x,
+                original_plan=original_plan,
             )
         )
         return individual
@@ -215,7 +216,7 @@ class MOGA(object):
         Generate an initial population of :class:`core.moga.Individual`
         objects.
 
-        :return: a list of :class:`Individual` objects.
+        :return: a list of :class:`core.moga.Individual` objects.
 
         """
         if self.parallel:
@@ -232,7 +233,8 @@ class MOGA(object):
                 plan=Plan(
                     system=self.plan.system,
                     activities=deepcopy(self.plan.activities),
-                    grouping_structure=s
+                    grouping_structure=s,
+                    original_plan=self.plan,
                 )
             ) for s in population
         ]
@@ -248,6 +250,7 @@ class MOGA(object):
                     system=self.plan.system,
                     activities=deepcopy(self.plan.activities),
                     grouping_structure=S,
+                    original_plan=self.plan,
                 )
             )
         )
@@ -267,18 +270,20 @@ class MOGA(object):
             with Pool(processes=cpu_count()) as pool:
                 offspring = pool.starmap(
                     Individual.mutate,
-                    zip(parents, repeat(self.p_mutation, len(parents)))
+                    zip(parents, repeat(self.p_mutation, len(parents)),
+                        repeat(self.plan, len(parents)))
                 )
         else:
-            offspring = [Individual.mutate(individual, self.p_mutation)
-                         for individual in parents]
+            offspring = [Individual.mutate(individual, self.p_mutation,
+                         self.plan) for individual in parents]
         return offspring
 
     def fast_non_dominated_sort(self, population):
         """
         Apply the fast non-dominated sort algorithm as in Deb et al. [1]_.
 
-        :param list population: a list of :class:`Individual` objects.
+        :param list population: a list of :class:`core.moga.Individual`
+        objects.
         :return: a list of lists; each list represents a front, and fronts are
         returned in ascending order (from the best to the worst).
 
@@ -409,6 +414,12 @@ class MOGAResults(object):
             x="LF",
             y="IC",
             hover_name="ID",
+        )
+        fig.update_layout(
+            title="Pareto front after {} ".format(self.moga.n_generations) +
+                "generations with {} ".format(self.moga.init_pop_size) +
+                "individuals, {}".format(self.moga.plan.system.resources) +
+                " resources, and p_mutation={}.".format(self.moga.p_mutation)
         )
         return fig
 

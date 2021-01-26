@@ -121,13 +121,19 @@ class Plan(object):
 
     """
 
-    def __init__(self, activities, system, grouping_structure=None):
+    def __init__(
+        self,
+        activities,
+        system,
+        grouping_structure=None,
+        original_plan=None,
+    ):
         self.activities = activities
         self.system = system
         self.IC = 0.0
         self.LF = self.evaluate_flow_reduction()
         self.N = len(self.activities)
-        if grouping_structure is not None:
+        if grouping_structure is not None and original_plan is not None:
             # Save the grouping structure as attribute (for future use in E/T
             # minimization)
             self.grouping_structure = grouping_structure
@@ -135,7 +141,7 @@ class Plan(object):
             self.set_resources()
             # Set activities' dates according to the grouping structure.
             # set_dates updates also the IC of the plan.
-            self.set_dates()
+            self.set_dates(original_plan)
             # Evaluate the new LF
             self.LF = self.evaluate_flow_reduction()
 
@@ -191,7 +197,7 @@ class Plan(object):
         )
         return fig
 
-    def set_dates(self):
+    def set_dates(self, original_plan):
         """
         Implement the whole optimization procedure: firstly, activities are
         scheduled at group date, and subsequently they are ordered according to
@@ -208,10 +214,10 @@ class Plan(object):
         for i, a in enumerate(self.activities):
             a.idx = i
         # Store a copy of the original plan
-        original_plan = Plan(
-            activities=copy.deepcopy(self.activities),
-            system=copy.deepcopy(self.system),
-        )
+        # original_plan = Plan(
+        #     activities=copy.deepcopy(self.activities),
+        #     system=copy.deepcopy(self.system),
+        # )
         # Lists to store coefficients of the optimization problem
         A, lb, ub = [], [], []
         ##################################
@@ -301,8 +307,8 @@ class Plan(object):
         )
         for a in self.activities:
             a.t = solution.x[a.idx]
-        self.IC = sum((a.h(a.t - original_plan.activities[a.idx].t) for a in
-                       self.activities))
+        self.IC = sum([a.h(a.t - original_plan.activities[a.idx].t) for a in
+                       self.activities])
 
     def set_resources(self):
         """Store the resource id in each activity."""

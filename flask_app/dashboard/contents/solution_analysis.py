@@ -208,7 +208,7 @@ def solution_analysis_callbacks(app, cache):
          Input("solution-type", "value"),
          Input("models-dropdown", "value")]
     )
-    def load_solution_layout(solution_id, solution_type, model_name):
+    def load_solution(solution_id, solution_type, model_name):
         if solution_id is None or solution_type is None:
             raise PreventUpdate
         plan, population = load_last_generation(model_name)
