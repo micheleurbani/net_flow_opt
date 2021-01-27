@@ -163,7 +163,12 @@ class Plan(object):
                     "Start": a.t,
                     "Finish": a.t + a.d,
                     "Group": "Group {}".format(
-                        np.argmax(self.grouping_structure[a.idx, :])
+                        np.argmax(
+                            np.sum(
+                                self.grouping_structure[a.idx, :, :],
+                                axis=1,
+                            )
+                        )
                     ),
                     "Resource": "Crew {}".format(a.r),
                 } for a in self.activities
