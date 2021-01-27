@@ -418,8 +418,8 @@ class MOGAResults(object):
         fig.update_layout(
             title="Pareto front after {} ".format(self.moga.n_generations) +
                 "generations with {} ".format(self.moga.init_pop_size) +
-                "individuals, {}".format(self.moga.plan.system.resources) +
-                " resources, and p_mutation={}.".format(self.moga.p_mutation)
+                "individuals, {} ".format(self.moga.plan.system.resources) +
+                "resources, and p_mutation={}.".format(self.moga.p_mutation)
         )
         return fig
 
