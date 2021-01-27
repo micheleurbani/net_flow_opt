@@ -488,6 +488,7 @@ class MOGAResults(object):
         df = df[df.generation == df.generation.max()]
         df = df.filter(["IC", "LF"])
         df = df.drop_duplicates()
+        df = df.sort_values(by="IC", ascending=False)
         fname = "export.csv"
         df.to_csv("flask_app/static/" + fname, index=False)
         return fname
