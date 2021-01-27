@@ -438,3 +438,14 @@ class MOGAResults(object):
             range_y=(df.IC.min() - 1, df.IC.max() + 2),
         )
         return fig
+
+    def pareto_to_csv(self):
+        """Export the coordinates of the points on the Pareto front in a CSV
+        file, and saves it in the folder `static`."""
+        df = self.to_dataframe()
+        df = df[df.generation == df.generation.max()]
+        df = df.filter(["IC", "LF"])
+        df = df.drop_duplicates()
+        fname = "export.csv"
+        df.to_csv("flask_app/static/" + fname, index=False)
+        return fname

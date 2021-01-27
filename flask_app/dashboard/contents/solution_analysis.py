@@ -178,8 +178,14 @@ def solution_analysis_callbacks(app, cache):
         ga = load_data(model_name)
 
         if plot_type == "pfront":
-            return ([dcc.Graph(id="pareto-plot", figure=ga.pareto_front())],
-                    solution_layout)
+            fname = ga.pareto_to_csv()
+            return (
+                [
+                    dcc.Graph(id="pareto-plot", figure=ga.pareto_front()),
+                    html.A("Export CSV", href="download/" + fname)
+                ],
+                    solution_layout
+            )
         elif plot_type == "pevo":
             return ([dcc.Graph(id="pareto-plot",
                      figure=ga.pareto_evolution())], [])
