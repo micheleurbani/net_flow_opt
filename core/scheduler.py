@@ -262,8 +262,8 @@ class Plan(object):
                 g.activities.sort(key=lambda x: x.d, reverse=True)
                 # Define the constraint to guarantee the nested interval
                 if len(g.activities) > 1:
-                    c = np.zeros(self.system.N)
                     for i in range(len(g.activities) - 1):
+                        c = np.zeros(self.system.N)
                         c[g.activities[i].idx] = -1
                         c[g.activities[i + 1].idx] = 1
                         A.append(c)
