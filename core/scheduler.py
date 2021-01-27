@@ -155,6 +155,14 @@ class Plan(object):
         """
         The method returns a :class:`plotly.express.timeline` object.
         """
+        try:
+            getattr(self, 'grouping_structure')
+        except AttributeError:
+            gs = np.zeros((self.N, self.N, self.system.resources))
+            gs[:, 0, 0] = np.ones(self.N)
+            self.grouping_structure = gs
+            for i, a in enumerate(self.activities):
+                a.idx = i
         plan_data = pd.DataFrame(
             [
                 {
