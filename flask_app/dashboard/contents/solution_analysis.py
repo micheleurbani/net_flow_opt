@@ -182,8 +182,7 @@ def solution_analysis_callbacks(app, cache):
                     solution_layout)
         elif plot_type == "pevo":
             return ([dcc.Graph(id="pareto-plot",
-                     figure=ga.pareto_evolution())],
-                     [])
+                     figure=ga.pareto_evolution())], [])
         return [], []
 
     @app.callback(
