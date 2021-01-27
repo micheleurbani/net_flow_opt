@@ -162,6 +162,9 @@ class Plan(object):
                     "Task": "Component {}".format(a.component.idx),
                     "Start": a.t,
                     "Finish": a.t + a.d,
+                    "Group": "Group {}".format(
+                        np.argmax(self.grouping_structure[a.idx, :])
+                    ),
                     "Resource": "Crew {}".format(a.r),
                 } for a in self.activities
             ]
@@ -176,7 +179,7 @@ class Plan(object):
         # Create figure
         gantt = ff.create_gantt(
             plan_data,
-            index_col="Resource",
+            index_col="Group",
             show_colorbar=True,
         )
         return gantt
@@ -213,11 +216,6 @@ class Plan(object):
         # Add index to activities
         for i, a in enumerate(self.activities):
             a.idx = i
-        # Store a copy of the original plan
-        # original_plan = Plan(
-        #     activities=copy.deepcopy(self.activities),
-        #     system=copy.deepcopy(self.system),
-        # )
         # Lists to store coefficients of the optimization problem
         A, lb, ub = [], [], []
         ##################################
