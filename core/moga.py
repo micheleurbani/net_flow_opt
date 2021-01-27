@@ -359,7 +359,8 @@ class MOGA(object):
 
     def save(self, fname):
         """
-        Pickle the object and save it in the folder results with name 'fname'.
+        Pickle the object and save it in the folder `results` with name
+        `fname`.
         """
         if "results" not in listdir():
             mkdir("results")
