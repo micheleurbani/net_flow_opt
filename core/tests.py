@@ -276,6 +276,20 @@ class MOGATestCase(unittest.TestCase):
         for i in population:
             self.assertIsInstance(i, Individual)
 
+    def test_adapt_initial_population(self):
+        self.moga.run()
+        population = self.moga.population_history[-1]
+        resources_old = self.moga.plan.system.resources
+        self.moga.plan.system.resources += 1
+        self.moga.run(initial_population=population)
+        for ind in self.moga.population_history[-1]:
+            self.assertIsInstance(ind, Individual)
+            self.assertGreater(ind.plan.system.resources, resources_old)
+            self.assertEqual(
+                ind.plan.grouping_structure.shape[2],
+                self.moga.plan.system.resources
+            )
+
     def test_mutation(self):
         self.moga.p_mutation = 1
         population = []

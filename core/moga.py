@@ -75,7 +75,7 @@ class Individual(object):
         individual = Individual(
             plan=Plan(
                 activities=deepcopy(individual.plan.activities),
-                system=deepcopy(individual.plan.system),
+                system=individual.plan.system,
                 grouping_structure=x,
                 original_plan=original_plan,
             )
@@ -112,13 +112,16 @@ class MOGA(object):
         self.plan = maintenance_plan
         self.population_history = []
 
-    def run(self):
+    def run(self, initial_population=None):
         """
         The method runs the algorithm until the ``stopping_criteria`` is not
         met and it returns the last generation of individuals.
         """
         # Generate the initial population
-        P = self.generate_initial_population()
+        if initial_population is None:
+            P = self.generate_initial_population()
+        else:
+            P = self.adapt_initial_population(initial_population)
         # Save the actual population for statistics
         self.population_history.append(P)
         for i in tqdm(range(self.n_generations),
@@ -255,6 +258,45 @@ class MOGA(object):
             )
         )
         return population
+
+    def adapt_initial_population(self, initial_population):
+        """
+        The method (un-)squeeze the assignment matrix along the dimension of
+        the resources.
+
+        :param list initial_population: a list of :class:`core.moga.Individual`
+        objects from which the assignment matrices are extracted.
+
+        :return: a list of :class:`core.moga.Individual` objects with the new
+        assignment matrices.
+        """
+        population = [ind.plan.grouping_structure for ind
+                      in initial_population]
+        assert population[0].shape[2] <= self.plan.system.resources
+        dim_to_add = self.plan.system.resources - population[0].shape[2]
+        if dim_to_add > 0:
+            population = [
+                np.dstack(
+                    (ind, np.zeros((self.plan.N, self.plan.N, dim_to_add)))
+                ) for ind in population
+            ]
+            population = [
+                Individual(
+                    plan=Plan(
+                        activities=deepcopy(self.plan.activities),
+                        system=self.plan.system,
+                        grouping_structure=sgm,
+                        original_plan=self.plan,
+                    )
+                ) for sgm in population
+            ]
+            return population
+        elif dim_to_add == 0:
+            return initial_population
+        else:
+            raise ValueError("The number of resources assigned to the system\
+                is lower than the number of resources in the initial_\
+                population")
 
     def mutation(self, parents):
         """
