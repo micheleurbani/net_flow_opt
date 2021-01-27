@@ -469,12 +469,10 @@ class MOGAResults(object):
     def pareto_evolution(self):
         """Returns an animation showing the evolution of the population."""
         df = self.to_dataframe()
-        df["is_pareto"] = df["rank"] == 1
         fig = scatter(
             data_frame=df,
             x="LF",
             y="IC",
-            color="is_pareto",
             animation_frame="generation",
             range_x=(df.LF.min() * 0.95, df.LF.max() * 1.05),
             range_y=(df.IC.min() - 1, df.IC.max() + 2),
