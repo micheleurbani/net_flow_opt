@@ -48,12 +48,12 @@ class Individual(object):
         for i in range(x.shape[0]):               # Loop among components
             if np.random.rand() < p_mutation:     # Sample mutation probability
                 g = []                            # List of candidate groups
-                g_id = np.flatnonzero(np.sum(x[i, :, :], axis=0))[0]
+                g_id = np.flatnonzero(x[i, :])[0]
                 for j in range(x.shape[1]):
                     # Avoid to check the component against itself
                     # and screen the possible groups using the number of
                     # resources
-                    if j != g_id and np.sum(x[:, j, :]) < \
+                    if j != g_id and np.sum(x[:, j]) < \
                             individual.plan.system.resources:
                         g.append(j)
                 # Further screen the groups on feasibility
@@ -61,17 +61,15 @@ class Individual(object):
                 for j in g:
                     activities = [
                             individual.plan.activities[c] for c in
-                            np.flatnonzero(np.sum(x[:, j, :], axis=1))
+                            np.flatnonzero(np.sum(x[:, j]))
                         ] + [individual.plan.activities[i]]
                     group = Group(activities=activities)
                     if group.is_feasible():
                         # Group is feasible update f
                         f.append(j)
-                allele = np.zeros((individual.plan.N,
-                                  individual.plan.system.resources), dtype=int)
-                allele[np.random.choice(f),
-                       np.random.randint(individual.plan.system.resources)] = 1
-                x[i, :, :] = allele
+                allele = np.zeros(individual.plan.N, dtype=int)
+                allele[np.random.choice(f)] = 1
+                x[i, :] = allele
         individual = Individual(
             plan=Plan(
                 activities=deepcopy(individual.plan.activities),
@@ -203,17 +201,6 @@ class MOGA(object):
                     Q = np.delete(Q, j)
         return S
 
-    def generate_individual_with_resources(self, i=None):
-        S = self.generate_individual()
-        assert type(S) is np.ndarray
-        x = []
-        for i in range(S.shape[0]):
-            c = np.zeros((self.plan.N, self.plan.system.resources))
-            c[:, np.random.randint(self.plan.system.resources)] = S[i, :]
-            x.append(c)
-        S = np.stack(x)
-        return S
-
     def generate_initial_population(self):
         """
         Generate an initial population of :class:`core.moga.Individual`
@@ -225,11 +212,11 @@ class MOGA(object):
         if self.parallel:
             with Pool(processes=cpu_count()) as pool:
                 population = pool.map(
-                    self.generate_individual_with_resources,
+                    self.generate_individual,
                     range(self.init_pop_size - 1)
                 )
         else:
-            population = [self.generate_individual_with_resources() for _ in
+            population = [self.generate_individual() for _ in
                           range(self.init_pop_size - 1)]
         population = [
             Individual(
@@ -243,10 +230,9 @@ class MOGA(object):
         ]
         # Remember to inject artificially the solution with all the activities
         # executed separately.
-        S = np.zeros(shape=(self.plan.N, self.plan.N,
-                            self.plan.system.resources), dtype=int)
+        S = np.zeros((self.plan.N, self.plan.N), dtype=int)
         for i in range(self.plan.N):
-            S[i, i, np.random.randint(self.plan.system.resources)] = 1
+            S[i, i] = 1
         population.append(
             Individual(
                 plan=Plan(
@@ -272,31 +258,17 @@ class MOGA(object):
         """
         population = [ind.plan.grouping_structure for ind
                       in initial_population]
-        assert population[0].shape[2] <= self.plan.system.resources
-        dim_to_add = self.plan.system.resources - population[0].shape[2]
-        if dim_to_add > 0:
-            population = [
-                np.dstack(
-                    (ind, np.zeros((self.plan.N, self.plan.N, dim_to_add)))
-                ) for ind in population
-            ]
-            population = [
-                Individual(
-                    plan=Plan(
-                        activities=deepcopy(self.plan.activities),
-                        system=self.plan.system,
-                        grouping_structure=sgm,
-                        original_plan=self.plan,
-                    )
-                ) for sgm in population
-            ]
-            return population
-        elif dim_to_add == 0:
-            return initial_population
-        else:
-            raise ValueError("The number of resources assigned to the system\
-                is lower than the number of resources in the initial_\
-                population")
+        population = [
+            Individual(
+                plan=Plan(
+                    activities=deepcopy(self.plan.activities),
+                    system=self.plan.system,
+                    grouping_structure=sgm,
+                    original_plan=self.plan,
+                )
+            ) for sgm in population
+        ]
+        return population
 
     def mutation(self, parents):
         """

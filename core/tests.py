@@ -160,8 +160,6 @@ class PlanTestCase(unittest.TestCase):
             grouping_structure=sgm,
             original_plan=self.plan,
         )
-        # Squeeze the sgm to retain only the information about group assignment
-        sgm = np.sum(sgm, axis=-1)
         # Initialize varible to check existence of at leat one group
         at_least_one_group = False
         # Compare the original plan with the new plan
@@ -181,12 +179,6 @@ class PlanTestCase(unittest.TestCase):
         # If there is at least one group of size > 1, the IC must be > 0
         if at_least_one_group:
             self.assertGreater(plan_opt.IC, 0.0)
-
-    def test_set_activities(self):
-        # Change the plan by adding a random grouping structure
-        self.add_random_grouping()
-        for a in self.activities:
-            self.assertIsNotNone(a.r)
 
     def test_generate_structure_history(self):
         # Change the plan by adding a random grouping structure
@@ -259,16 +251,6 @@ class MOGATestCase(unittest.TestCase):
             )
         # TODO: remember to test also with parallel=True
 
-    def test_generate_individual_with_resources(self):
-        individual = self.moga.generate_individual_with_resources()
-        for i in range(individual.shape[0]):
-            self.assertEqual(np.sum(individual[i, :, :]), 1)
-        for j in range(individual.shape[1]):
-            self.assertGreaterEqual(
-                self.system.resources,
-                np.sum(individual[:, j])
-            )
-
     def test_generate_initial_population(self):
         population = self.moga.generate_initial_population()
         self.assertIsNotNone(population)
@@ -285,16 +267,12 @@ class MOGATestCase(unittest.TestCase):
         for ind in self.moga.population_history[-1]:
             self.assertIsInstance(ind, Individual)
             self.assertGreater(ind.plan.system.resources, resources_old)
-            self.assertEqual(
-                ind.plan.grouping_structure.shape[2],
-                self.moga.plan.system.resources
-            )
 
     def test_mutation(self):
         self.moga.p_mutation = 1
         population = []
         for i in range(20):
-            sgm = self.moga.generate_individual_with_resources()
+            sgm = self.moga.generate_individual()
             individual = Individual(
                 plan=Plan(
                     activities=copy.deepcopy(self.activities),

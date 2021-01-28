@@ -137,8 +137,6 @@ class Plan(object):
             # Save the grouping structure as attribute (for future use in E/T
             # minimization)
             self.grouping_structure = grouping_structure
-            # Assign activities to resources
-            self.set_resources()
             # Set activities' dates according to the grouping structure.
             # set_dates updates also the IC of the plan.
             self.set_dates(original_plan)
@@ -251,7 +249,7 @@ class Plan(object):
         ##################################
         # Squeeze the matrix containing the grouping structure to containg only
         # the information about assignment to a group
-        grouping_structure = np.sum(self.grouping_structure, axis=-1)
+        grouping_structure = self.grouping_structure
         # Empty list to store group dates
         groups = []
         # Iterate over the columns of the grouping structure
@@ -260,9 +258,11 @@ class Plan(object):
             if grouping_structure[:, j].any():
                 # Use Group objects to set activities' dates
                 g = Group(
-                    activities=[self.activities[i] for i in
-                                range(self.system.N) if
-                                grouping_structure[i, j] == 1]
+                    activities=[
+                        self.activities[i] for i in
+                        range(self.system.N) if
+                        grouping_structure[i, j] == 1
+                    ]
                 )
                 groups.append(
                     {
@@ -352,9 +352,8 @@ class Plan(object):
         generate an infeasible maintenance plan."""
         sgm = []
         for i in range(self.N):
-            x = np.zeros((self.N, self.system.resources))
-            x[np.random.randint(self.system.N),
-              np.random.randint(self.system.resources)] = 1
+            x = np.zeros(self.N, dtype=int)
+            x[np.random.randint(self.system.N)] = 1
             sgm.append(x)
         sgm = np.stack(sgm)
         # print(sgm)
