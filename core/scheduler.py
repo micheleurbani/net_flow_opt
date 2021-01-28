@@ -201,6 +201,16 @@ class Plan(object):
         """ Return a Plotly Dash figure object representing the flow value as
         a function of time."""
         history = self.generate_flow_history()
+        # Append start and end date
+        history.append({
+            "date": min([i["date"] for i in history]) * 0.93,
+            "flow": self.system.regular_flow,
+        })
+        history.append({
+            "date": max([i["date"] for i in history]) * 1.03,
+            "flow": self.system.regular_flow,
+        })
+        history.sort(key=lambda x: x["date"])
         df = pd.DataFrame(history)
         # Change real values used for dates with datetime strings
         fig = Figure()
@@ -210,6 +220,11 @@ class Plan(object):
                 y=df.flow,
                 line_shape="hv",
             )
+        )
+        fig.update_layout(
+            yaxis={
+                "range": (0, self.system.regular_flow + 3)
+            }
         )
         return fig
 

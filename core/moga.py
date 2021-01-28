@@ -460,6 +460,8 @@ class MOGAResults(object):
             x="LF",
             y="IC",
             hover_name="ID",
+            range_x=(df.LF.min() * 0.95, df.LF.max() * 1.05),
+            range_y=(df.IC.min() - 1, df.IC.max() + 2),
         )
         fig.update_layout(
             title="Pareto front after {} ".format(self.moga.n_generations) +
