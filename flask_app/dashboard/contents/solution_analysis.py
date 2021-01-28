@@ -14,8 +14,9 @@ from core.moga import MOGAResults
 
 def load_models():
     model_names = listdir('./results/')
-    return [{'label': exp[:-4], 'value': exp} for exp
+    model_names = [{'label': exp[:-4], 'value': exp} for exp
             in model_names if exp[-4:] == '.pkl']
+    return model_names.sort()
 
 
 form_model = dbc.FormGroup(
