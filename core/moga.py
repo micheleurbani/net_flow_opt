@@ -421,6 +421,9 @@ class MOGA(object):
 class MOGAResults(object):
 
     def __init__(self, moga):
+        # Sanity check
+        assert type(moga) is MOGA
+        # Define attributes
         self.moga = moga
 
     def __str__(self):
