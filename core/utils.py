@@ -1,4 +1,5 @@
 import networkx as nx
+from random import random, seed
 
 
 from .system import Component
@@ -45,3 +46,5 @@ structure.add_edges_from([
     (components[8], "t"),
     (components[9], "t"),
 ])
+
+activities_duration = [random() * 3 + 1 for i in range(len(components))]

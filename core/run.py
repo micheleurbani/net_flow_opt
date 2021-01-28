@@ -4,7 +4,7 @@ from random import random, seed
 
 from core.moga import MOGA
 from core.system import System
-from core.utils import components, structure
+from core.utils import components, structure, activities_duration
 from core.scheduler import Activity, Plan
 
 
@@ -15,14 +15,14 @@ for r in resources:
         Activity(
             component=c,
             date=c.x_star,
-            duration=random() * 3 + 1
-        ) for c in components
+            duration=activities_duration[i],
+        ) for i, c in enumerate(components)
     ]
 
     system = System(
         structure=structure,
         resources=r,
-        components=components
+        components=components,
     )
 
     plan = Plan(
