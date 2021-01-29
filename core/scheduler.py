@@ -156,8 +156,8 @@ class Plan(object):
         try:
             getattr(self, 'grouping_structure')
         except AttributeError:
-            gs = np.zeros((self.N, self.N, self.system.resources))
-            gs[:, 0, 0] = np.ones(self.N)
+            gs = np.zeros((self.N, self.N))
+            gs[:, 0] = np.ones(self.N)
             self.grouping_structure = gs
             for i, a in enumerate(self.activities):
                 a.idx = i
@@ -170,10 +170,7 @@ class Plan(object):
                     "Finish": a.t + a.d,
                     "Group": "Group {}".format(
                         np.argmax(
-                            np.sum(
-                                self.grouping_structure[a.idx, :, :],
-                                axis=1,
-                            )
+                            self.grouping_structure[a.idx, :],
                         )
                     ),
                     "Resource": "Crew {}".format(a.r),
