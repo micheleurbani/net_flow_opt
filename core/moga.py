@@ -429,7 +429,7 @@ class MOGAResults(object):
         # Filter only the last generation
         df = df[df.generation == df.generation.max()]
         # Filter individuals with rank 1
-        df = df[df.rank == 1]
+        df = df[df["rank"] == 1]
         fig = scatter(
             data_frame=df,
             x="LF",
