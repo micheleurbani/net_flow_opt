@@ -426,7 +426,10 @@ class MOGAResults(object):
         """Returns a scatter plot representig the Pareto front of the last
         generation."""
         df = self.to_dataframe()
+        # Filter only the last generation
         df = df[df.generation == df.generation.max()]
+        # Filter individuals with rank 1
+        df = df[df.rank == 1]
         fig = scatter(
             data_frame=df,
             x="LF",
