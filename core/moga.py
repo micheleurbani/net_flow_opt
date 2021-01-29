@@ -463,8 +463,9 @@ class MOGAResults(object):
         """Export the coordinates of the points on the Pareto front in a CSV
         file, and saves it in the folder `static`."""
         df = self.to_dataframe()
-        df = df[df.generation == df.generation.max()]
-        df = df.filter(["IC", "LF"])
+        df = df[df.generation == df.generation.max()]  # Keep only the last gen
+        df = df[df["rank"] == 1]  # Keep only point on the Pareto front
+        df = df.filter(["IC", "LF"])  # Keep only the score
         df = df.drop_duplicates()
         df = df.sort_values(by="IC", ascending=False)
         fname = "export.csv"
