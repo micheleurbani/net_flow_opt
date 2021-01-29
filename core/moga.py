@@ -45,11 +45,11 @@ class Individual(object):
         It returns a newly generated individual.
         """
         x = deepcopy(individual.plan.grouping_structure)
-        for i in range(x.shape[0]):               # Loop among components
+        for i in range(individual.plan.N):               # Loop among components
             if np.random.rand() < p_mutation:     # Sample mutation probability
                 g = []                            # List of candidate groups
                 g_id = np.flatnonzero(x[i, :])[0]
-                for j in range(x.shape[1]):
+                for j in range(individual.plan.N):
                     # Avoid to check the component against itself
                     # and screen the possible groups using the number of
                     # resources
@@ -61,13 +61,14 @@ class Individual(object):
                 for j in g:
                     activities = [
                             individual.plan.activities[c] for c in
-                            np.flatnonzero(np.sum(x[:, j]))
+                            np.flatnonzero(x[:, j])
                         ] + [individual.plan.activities[i]]
                     group = Group(activities=activities)
                     if group.is_feasible():
                         # Group is feasible update f
                         f.append(j)
                 allele = np.zeros(individual.plan.N, dtype=int)
+                assert len(f) < individual.plan.N
                 allele[np.random.choice(f)] = 1
                 x[i, :] = allele
         individual = Individual(
@@ -247,8 +248,7 @@ class MOGA(object):
 
     def adapt_initial_population(self, initial_population):
         """
-        The method (un-)squeeze the assignment matrix along the dimension of
-        the resources.
+        The method initialize a new population with the new system.
 
         :param list initial_population: a list of :class:`core.moga.Individual`
         objects from which the assignment matrices are extracted.

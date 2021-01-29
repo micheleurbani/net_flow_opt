@@ -33,12 +33,12 @@ for r in resources:
     moga = MOGA(
         init_pop_size=100,
         p_mutation=0.2,
-        n_generations=150,
+        n_generations=1,
         maintenance_plan=plan,
         parallel=True,
     )
     if r == resources[0]:
         initial_population = None
     moga.run(initial_population=initial_population)
-    moga.save("r{}_2701_200iter_100ind_20p".format(r))
+    # moga.save("r{}_2701_200iter_100ind_20p".format(r))
     initial_population = deepcopy(moga.population_history[-1])
