@@ -40,5 +40,5 @@ for r in resources:
     if r == resources[0]:
         initial_population = None
     moga.run(initial_population=initial_population)
-    # moga.save("r{}_2701_200iter_100ind_20p".format(r))
+    moga.save("r{}_".format(r))
     initial_population = deepcopy(moga.population_history[-1])

@@ -125,6 +125,8 @@ class MOGA(object):
         self.population_history.append(P)
         for i in tqdm(range(self.n_generations),
                       desc="MOGA execution", ncols=100):
+            # Selection of individuals
+            P = self.selection(P)
             # Generate the offspring population Q by mutation
             Q = self.mutation(P)
             # Perform fast non-dominated sort
@@ -269,6 +271,20 @@ class MOGA(object):
             ) for sgm in population
         ]
         return population
+
+    def selection(self, populaiton):
+        """
+        The method removes the duplicates in the population.
+
+        :return: a list of :class:`core.moga.Individual` objects.
+        """
+        selected, scores = [], []
+        for ind in populaiton:
+            score = (ind.IC, ind.LF)
+            if score not in scores:
+                scores.append(score)
+                selected.append(ind)
+        return selected
 
     def mutation(self, parents):
         """
