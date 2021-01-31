@@ -269,18 +269,9 @@ class MOGATestCase(unittest.TestCase):
             self.assertGreater(ind.plan.system.resources, resources_old)
 
     def test_selection(self):
-        ind1 = Individual(plan=self.plan)
-        ind1.IC = 34.0
-        ind1.LF = 210.0
-        ind2 = Individual(plan=self.plan)
-        ind2.IC = 34.0
-        ind2.LF = 210.0
-        ind3 = Individual(plan=self.plan)
-        ind3.IC = 56.0
-        ind3.LF = 290.0
-        pop = [ind1, ind2, ind3]
-        selected = self.moga.selection(pop)
-        self.assertLess(len(selected), len(pop))
+        pop = self.moga.generate_initial_population()
+        sel = self.moga.selection(pop)
+        self.assertEqual(len(pop), len(sel))
 
     def test_mutation(self):
         population = []

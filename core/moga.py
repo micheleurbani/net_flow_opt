@@ -1,6 +1,7 @@
 import numpy as np
 from tqdm import tqdm
 from pickle import dump
+from random import sample
 from copy import deepcopy
 from pandas import DataFrame
 from itertools import repeat
@@ -272,19 +273,46 @@ class MOGA(object):
         ]
         return population
 
-    def selection(self, populaiton):
+    def selection(self, population):
         """
         The method removes the duplicates in the population.
 
         :return: a list of :class:`core.moga.Individual` objects.
         """
+        n = len(population)
+        # Remove duplicates
         selected, scores = [], []
-        for ind in populaiton:
-            score = (ind.IC, ind.LF)
+        for ind in population:
+            score = (ind.plan.IC, ind.plan.LF)
             if score not in scores:
                 scores.append(score)
                 selected.append(ind)
-        return selected
+        # Enrich population by binary tournament selection
+        population = []
+        while len(population) < n - len(selected):
+            mates = sample(selected, 2)
+            if mates[0].rank == mates[1].rank:
+                # Look at the rank
+                if mates[0].crowding_distance >= mates[1].crowding_distance:
+                    idx = 0
+                else:
+                    idx = 1
+            elif mates[0].rank > mates[1].rank:
+                idx = 1
+            else:
+                idx = 0
+            population.append(
+                Individual(
+                    plan=Plan(
+                        activities=deepcopy(mates[idx].plan.activities),
+                        system=self.plan.system,
+                        grouping_structure=mates[idx].plan.\
+                            grouping_structure,
+                        original_plan=self.plan,
+                    )
+                )
+            )
+        return population + selected
 
     def mutation(self, parents):
         """
