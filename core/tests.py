@@ -289,9 +289,9 @@ class MOGATestCase(unittest.TestCase):
         # Change p_mutation to be sure the mutation to occure
         self.moga.p_mutation = 1
         mutated = self.moga.mutation(population)
-        # for i in mutated:
-        #     self.assertFalse(np.all(i == i.plan.grouping_structure))
-        # self.moga.p_mutation = 0.2
+        for i in mutated:
+            self.assertFalse(np.all(i == i.plan.grouping_structure))
+        self.moga.p_mutation = 0.2
 
     def test_fast_non_dominated_sort(self):
         population = self.moga.generate_initial_population()

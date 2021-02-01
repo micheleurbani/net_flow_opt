@@ -46,7 +46,7 @@ class Individual(object):
         It returns a newly generated individual.
         """
         x = deepcopy(individual.plan.grouping_structure)
-        for i in range(individual.plan.N):               # Loop among components
+        for i in range(individual.plan.N):        # Loop among components
             if np.random.rand() < p_mutation:     # Sample mutation probability
                 g = []                            # List of candidate groups
                 g_id = np.flatnonzero(x[i, :])[0]
@@ -58,7 +58,7 @@ class Individual(object):
                             individual.plan.system.resources:
                         g.append(j)
                 # Further screen the groups on feasibility
-                f = []
+                f, p = [], []
                 for j in g:
                     activities = [
                             individual.plan.activities[c] for c in
@@ -68,9 +68,11 @@ class Individual(object):
                     if group.is_feasible():
                         # Group is feasible update f
                         f.append(j)
+                        p.append(max([1, group.size]))
                 allele = np.zeros(individual.plan.N, dtype=int)
                 assert len(f) < individual.plan.N
-                allele[np.random.choice(f)] = 1
+                p = np.array(p) / sum(p)
+                allele[np.random.choice(f, p=p)] = 1
                 x[i, :] = allele
         individual = Individual(
             plan=Plan(
@@ -306,8 +308,7 @@ class MOGA(object):
                     plan=Plan(
                         activities=deepcopy(mates[idx].plan.activities),
                         system=self.plan.system,
-                        grouping_structure=mates[idx].plan.\
-                            grouping_structure,
+                        grouping_structure=mates[idx].plan.grouping_structure,
                         original_plan=self.plan,
                     )
                 )

@@ -15,7 +15,7 @@ from core.moga import MOGAResults
 def load_models():
     model_names = listdir('./results/')
     model_names = [{'label': exp[:-4], 'value': exp} for exp
-            in model_names if exp[-4:] == '.pkl']
+                   in model_names if exp[-4:] == '.pkl']
     return model_names
 
 
@@ -185,7 +185,7 @@ def solution_analysis_callbacks(app, cache):
                     dcc.Graph(id="pareto-plot", figure=ga.pareto_front()),
                     html.A("Export CSV", href="download/" + fname)
                 ],
-                    solution_layout
+                solution_layout
             )
         elif plot_type == "pevo":
             return ([dcc.Graph(id="pareto-plot",

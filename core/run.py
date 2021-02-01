@@ -1,6 +1,6 @@
 
 from copy import deepcopy
-from random import random, seed
+from random import seed
 
 from core.moga import MOGA
 from core.system import System
@@ -31,14 +31,14 @@ for r in resources:
     )
 
     moga = MOGA(
-        init_pop_size=100,
-        p_mutation=0.2,
-        n_generations=1,
+        init_pop_size=80,
+        p_mutation=0.3,
+        n_generations=30,
         maintenance_plan=plan,
         parallel=True,
     )
     if r == resources[0]:
         initial_population = None
     moga.run(initial_population=initial_population)
-    moga.save("r{}_".format(r))
+    moga.save("r{}_engroup".format(r))
     initial_population = deepcopy(moga.population_history[-1])

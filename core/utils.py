@@ -1,5 +1,5 @@
 import networkx as nx
-from random import random, seed
+from random import random
 
 
 from .system import Component
