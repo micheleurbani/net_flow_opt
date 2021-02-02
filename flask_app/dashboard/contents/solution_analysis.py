@@ -122,9 +122,13 @@ load_solution = html.Div(
     className="container",
 )
 
-pareto_front = html.Div(
-    id="div-pareto",
-    className="container",
+pareto_front = dcc.Loading(
+    id="loading-pareto",
+    type="default",
+    children=html.Div(
+        id="div-pareto",
+        className="container",
+    )
 )
 
 gantt_chart = html.Div(
