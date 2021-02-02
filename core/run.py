@@ -31,14 +31,14 @@ for r in resources:
     )
 
     moga = MOGA(
-        init_pop_size=80,
+        init_pop_size=5,
         p_mutation=0.3,
-        n_generations=30,
+        n_generations=5,
         maintenance_plan=plan,
         parallel=True,
     )
     if r == resources[0]:
         initial_population = None
     moga.run(initial_population=initial_population)
-    moga.save("r{}_engroup".format(r))
+    moga.save("r{}_".format(r))
     initial_population = deepcopy(moga.population_history[-1])

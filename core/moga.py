@@ -40,7 +40,7 @@ class Individual(object):
                 .format(self.score, self.rank, self.crowding_distance)
 
     @staticmethod
-    def mutate(individual, p_mutation, original_plan):
+    def mutate(individual, p_mutation, original_plan, progress):
         """
         The method is used to parallelize the mutation process of a population.
         It returns a newly generated individual.
@@ -71,7 +71,10 @@ class Individual(object):
                         p.append(max([1, group.size]))
                 allele = np.zeros(individual.plan.N, dtype=int)
                 assert len(f) < individual.plan.N
-                p = np.array(p) / sum(p)
+                if progress < 0.5:
+                    p = np.ones(len(f)) / len(f)
+                else:
+                    p = np.array(p) / sum(p)
                 allele[np.random.choice(f, p=p)] = 1
                 x[i, :] = allele
         individual = Individual(
@@ -130,8 +133,9 @@ class MOGA(object):
                       desc="MOGA execution", ncols=100):
             # Selection of individuals
             P = self.selection(P)
+            progress = i / self.n_generations
             # Generate the offspring population Q by mutation
-            Q = self.mutation(P)
+            Q = self.mutation(P, progress)
             # Perform fast non-dominated sort
             fronts = self.fast_non_dominated_sort(P+Q)
             # Create the new generation
@@ -315,7 +319,7 @@ class MOGA(object):
             )
         return population + selected
 
-    def mutation(self, parents):
+    def mutation(self, parents, progress):
         """
         The method returns a population of mutated individuals.
         The procedure parallel processes the individuals in parents.
@@ -330,11 +334,12 @@ class MOGA(object):
                 offspring = pool.starmap(
                     Individual.mutate,
                     zip(parents, repeat(self.p_mutation, len(parents)),
-                        repeat(self.plan, len(parents)))
+                        repeat(self.plan, len(parents)),
+                        repeat(progress, len(parents)))
                 )
         else:
             offspring = [Individual.mutate(individual, self.p_mutation,
-                         self.plan) for individual in parents]
+                         self.plan, progress) for individual in parents]
         return offspring
 
     def fast_non_dominated_sort(self, population):
