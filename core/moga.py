@@ -431,7 +431,7 @@ class MOGA(object):
             raise ValueError("The name of the file is incorrect, please \
                                 check its extension.")
         # Save object
-        with open("results/{}".format(fname), "wb") as f:
+        with open("{}".format(fname), "wb") as f:
             dump(self, f)
 
 

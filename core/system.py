@@ -66,7 +66,7 @@ class System:
     def __str__(self):
         message = "System with {} resources.\n".format(self.resources)
         for c in self.components:
-            message += "{}".format(c)
+            message += "{}\n".format(c)
         return message
 
     def plot_system_structure(self, structure=None):
