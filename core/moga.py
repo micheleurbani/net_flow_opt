@@ -452,6 +452,13 @@ class MOGAResults(object):
             )
 
     def to_dataframe(self):
+        """
+        Return a :class:`pandas.DataFrame` containing per individual
+        information. The values include :math:`LF`, :math:`IC`, rank,
+        generation, and ID of each solution.
+
+        :return: a :class:`pandas.DataFrame` object.
+        """
         df = []
         for generation, population in enumerate(self.moga.population_history):
             for idx, i in enumerate(population):
@@ -516,3 +523,61 @@ class MOGAResults(object):
         fname = "export.csv"
         df.to_csv("flask_app/static/" + fname, index=False)
         return fname
+
+    @staticmethod
+    def generation_HV(n_sample, list_of_scores, bounds):
+        print(list_of_scores)
+        lf_max, lf_min, ic_max, ic_min = bounds
+        dominated = 0
+        for _ in range(n_sample):
+            # Generate a random point
+            x = (
+                np.random.random() * (lf_max - lf_min) + lf_min,  # LF
+                np.random.random() * (ic_max - ic_min) + ic_min   # IC
+            )
+            for score in list_of_scores:
+                if score[0] < x[0] and score[1] < x[1]:
+                    dominated += 1
+                    break
+        return dominated / n_sample
+
+    def hypervolume_indicator(self, n_sample, lf_max, lf_min, ic_max, ic_min):
+        """
+        The method calculates the hyper-volume (HV) indicator of each
+        generation and returns the series of points required to plot it.
+        It is required to provide :math:`LF_{min}`, :math:`LF_{max}`,
+        :math:`IC_{max}`, and :math:`IC_{mix}` so that several HV curves can be
+        compared.
+
+        :params int n_sample: the number of sample points used to evaluate the
+        HV indicator.
+        :params float lf_min: the lower bound for :math:`LF`.
+        :params float lf_max: the upper bound for :math:`LF`.
+        :params float ic_min: the lower bound for :math:`IC`.
+        :params float ic_max: the upper bound for :math:`IC`.
+
+        :return: the HV indicator value for each generation.
+        :rtype: list of float.
+
+        """
+        # Define a function for calculation of the HV of a single generation
+
+        # Retrieve the list of scores
+        scores = [
+            [(ind.plan.LF, ind.plan.IC) for ind in generation] for generation
+            in self.moga.population_history
+        ]
+        # Wrap bounds in a tuple
+        bounds = (lf_max, lf_min, ic_max, ic_min)
+
+        # Parallelize calculation
+        with Pool(processes=cpu_count()) as pool:
+            hv = pool.starmap(
+                MOGAResults.generation_HV,
+                zip(
+                    repeat(n_sample, len(self.moga.population_history)),
+                    scores,
+                    repeat(bounds, len(self.moga.population_history))
+                )
+            )
+        return hv

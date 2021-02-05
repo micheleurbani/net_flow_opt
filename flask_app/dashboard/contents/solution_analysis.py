@@ -149,6 +149,7 @@ solution_analysis_contents = html.Div(
         load_solution,
         gantt_chart,
         flow_plot,
+        html.Br(),
     ],
     className="container",
 )

@@ -8,7 +8,7 @@ import networkx as nx
 
 from .system import Component, System
 from .scheduler import Activity, Group, Plan
-from .moga import MOGA, Individual
+from .moga import Individual, MOGA, MOGAResults
 from .utils import components, structure
 
 
@@ -328,6 +328,55 @@ class MOGATestCase(unittest.TestCase):
         # Check the number of individuals in each generation
         for gen in self.moga.population_history:
             self.assertEqual(len(gen), self.moga.init_pop_size)
+
+
+class MOGAResultsTestCase(unittest.TestCase):
+
+    def setUp(self):
+        # Create one maintenance activity per component
+        self.activities = [
+            Activity(
+                component=c,
+                date=c.x_star,
+                duration=random.random() * 3 + 1
+            ) for c in components
+        ]
+        self.system = System(
+            structure=structure,
+            resources=3,
+            components=components
+        )
+        self.plan = Plan(
+            activities=self.activities,
+            system=self.system,
+        )
+        self.moga = MOGA(
+            init_pop_size=5,
+            p_mutation=0.1,
+            n_generations=5,
+            maintenance_plan=self.plan,
+            parallel=False,
+        )
+        # Run the algorithm
+        self.moga.run()
+
+    def test_hypervolume_indicator(self):
+        results = MOGAResults(self.moga)
+        # Retrieve bounds for calculation
+        lf_max, lf_min, ic_max, ic_min = 0.0, 1e4, 0.0, 1e4
+        for generation in results.moga.population_history:
+            for ind in generation:
+                if ind.plan.LF > lf_max:
+                    lf_max = ind.plan.LF
+                elif ind.plan.LF < lf_min:
+                    lf_min = ind.plan.LF
+                if ind.plan.IC > ic_max:
+                    ic_max = ind.plan.IC
+                elif ind.plan.IC < ic_min:
+                    ic_min = ind.plan.IC
+        hv_values = results.hypervolume_indicator(1000, lf_max, lf_min,
+                                                  ic_max, ic_min)
+        print(hv_values)
 
 
 if __name__ == "__main__":
