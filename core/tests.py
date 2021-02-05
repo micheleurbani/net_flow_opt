@@ -144,6 +144,16 @@ class PlanTestCase(unittest.TestCase):
             original_plan=self.plan,
         )
 
+    def test_separate_activities(self):
+        sgm = np.zeros((self.plan.N, self.plan.N), dtype=int)
+        sgm = np.fill_diagonal(sgm, 1)
+        plan = Plan(
+            activities=self.activities,
+            system=self.system,
+            grouping_structure=sgm,
+            original_plan=self.plan,
+        )
+
     def test_gantt_chart(self):
         self.assertIsInstance(
             self.plan.plot_gantt_chart(),
@@ -376,7 +386,6 @@ class MOGAResultsTestCase(unittest.TestCase):
                     ic_min = ind.plan.IC
         hv_values = results.hypervolume_indicator(1000, lf_max, lf_min,
                                                   ic_max, ic_min)
-        print(hv_values)
 
 
 if __name__ == "__main__":

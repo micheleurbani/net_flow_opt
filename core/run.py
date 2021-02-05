@@ -1,5 +1,7 @@
 
+import pandas as pd
 import networkx as nx
+from pickle import load
 from copy import deepcopy
 from os import listdir, mkdir
 from datetime import datetime
@@ -142,5 +144,58 @@ def repeat_random_experiment(n):
         randomized_experiment(i)
 
 
+def experiment_from_old_data():
+    results = []
+    for r in [2, 3, 4]:
+        with open("results/exp_17_42_335/r{r}.pkl", "rb") as f:
+            moga = load(f)
+
+        # Clear old solutions
+        moga.population_history = []
+
+        # Run the experiment again, without initial population
+        moga.run()
+        # Save results
+        if "paper" not in listdir("results"):
+            mkdir("results/paper")
+        moga.save("results/paper/r{}".format(r))
+        result = MOGAResults(moga)
+        df = results.to_dataframe()
+        df = df[df.generation == df.generation.max()]  # Keep only the last gen
+        df = df[df["rank"] == 1]  # Keep only point on the Pareto front
+        df = df.filter(["IC", "LF"])  # Keep only the score
+        df = df.drop_duplicates()
+        df = df.sort_values(by="IC", ascending=False)
+        fname = "results/paper/r{}.csv".format(r)
+        df.to_csv(fname, index=False)
+        results.append(result)
+    return results
+
+def hypervolume_multiple_experiments(results):
+    for r in results:
+        assert type(r) is MOGAResults
+    # Find bounds for calculation of the hypervolume
+    lf_max, lf_min, ic_max, ic_min = 0.0, 1e4, 0.0, 1e4
+    for result in results:
+        for generation in result.moga.population_history:
+            for ind in generation:
+                if ind.plan.LF > lf_max:
+                    lf_max = ind.plan.LF
+                elif ind.plan.LF < lf_min:
+                    lf_min = ind.plan.LF
+                if ind.plan.IC > ic_max:
+                    ic_max = ind.plan.IC
+                elif ind.plan.IC < ic_min:
+                    ic_min = ind.plan.IC
+    # Compute hypervolumes
+    hv = []
+    for r in result:
+        hv.append(r.hypervolume_indicator())
+    data = {i: hv for i, hv in enumerate(hv)}
+    df = pd.DataFrame(data)
+    df.to_csv("results/paper/hv_values.csv", index=False)
+
+
 if __name__ == "__main__":
-    repeat_random_experiment(2)
+    results = experiment_from_old_data()
+    hypervolume_multiple_experiments(results)
