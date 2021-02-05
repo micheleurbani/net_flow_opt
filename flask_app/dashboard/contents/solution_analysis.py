@@ -229,13 +229,15 @@ def solution_analysis_callbacks(app, cache):
                     dcc.Graph(
                         id="gantt-chart",
                         figure=plan.plot_gantt_chart()
-                    )
+                    ),
+                    html.A("Export CSV", href="download/gantt_data.csv")
                 ]
                 flow = [
                     dcc.Graph(
                         id="flow-plot",
                         figure=plan.plot_flow_history()
-                    )
+                    ),
+                    html.A("Export CSV", href="download/flow_data.csv")
                 ]
                 return gantt, flow
             elif solution_type == "optim":
@@ -243,13 +245,15 @@ def solution_analysis_callbacks(app, cache):
                     dcc.Graph(
                         id="gantt-chart",
                         figure=population[solution_id].plan.plot_gantt_chart()
-                    )
+                    ),
+                    html.A("Export CSV", href="download/gantt_data.csv")
                 ]
                 flow = [
                     dcc.Graph(
                         id="flow-plot",
                         figure=population[solution_id].plan.plot_flow_history()
-                    )
+                    ),
+                    html.A("Export CSV", href="download/flow_data.csv")
                 ]
                 return gantt, flow
             else:

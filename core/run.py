@@ -147,7 +147,7 @@ def repeat_random_experiment(n):
 def experiment_from_old_data():
     results = []
     for r in [2, 3, 4]:
-        with open("results/exp_17_42_335/r{r}.pkl", "rb") as f:
+        with open(f"results/exp_17_42_335/r{r}.pkl", "rb") as f:
             moga = load(f)
 
         # Clear old solutions
@@ -160,7 +160,7 @@ def experiment_from_old_data():
             mkdir("results/paper")
         moga.save("results/paper/r{}".format(r))
         result = MOGAResults(moga)
-        df = results.to_dataframe()
+        df = result.to_dataframe()
         df = df[df.generation == df.generation.max()]  # Keep only the last gen
         df = df[df["rank"] == 1]  # Keep only point on the Pareto front
         df = df.filter(["IC", "LF"])  # Keep only the score

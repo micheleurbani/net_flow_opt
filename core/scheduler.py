@@ -173,12 +173,13 @@ class Plan(object):
                             self.grouping_structure[a.idx, :],
                         )
                     ),
-                    "Resource": "Crew {}".format(a.r),
                 } for a in self.activities
             ]
         )
         # Sort activities in descending order
         plan_data.sort_values(by=["Start"], inplace=True, ascending=False)
+        # Save data in CSV for exporting
+        plan_data.to_csv("flask_app/static/gantt_data.csv", index=False)
         # Convert float dates to datetime
         plan_data["Start"] = pd.to_datetime(plan_data["Start"] * 1e14,
                                             format="%Y-%m-%d")
@@ -207,6 +208,7 @@ class Plan(object):
         })
         history.sort(key=lambda x: x["date"])
         df = pd.DataFrame(history)
+        df.to_csv("flask_app/static/flow_data.csv", index=False)
         # Change real values used for dates with datetime strings
         fig = Figure()
         fig.add_trace(
