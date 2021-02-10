@@ -52,7 +52,7 @@ def simple_experiment():
         initial_population = deepcopy(moga.population_history[-1])
 
 
-def randomized_experiment(experiment_index):
+def randomized_experiment(experiment_indexm, seed):
     # Create a folder where to save the experiment
     dir_name = f"results/exp_{experiment_index}_{datetime.now().day}" + \
                 f"{datetime.now().month}_{datetime.now().hour}" + \
@@ -116,9 +116,9 @@ def randomized_experiment(experiment_index):
         )
 
         moga = MOGA(
-            init_pop_size=5,
+            init_pop_size=200,
             p_mutation=0.3,
-            n_generations=5,
+            n_generations=150,
             maintenance_plan=plan,
             parallel=True,
         )
@@ -141,18 +141,24 @@ def randomized_experiment(experiment_index):
 def repeat_random_experiment(n):
     """Repeat a random experiment n times."""
     for i in range(n):
-        randomized_experiment(i)
+        randomized_experiment(i, i)
 
 
 def experiment_from_old_data():
-    results = []
     for r in [2, 3, 4]:
-        with open(f"results/exp_17_42_335/r{r}.pkl", "rb") as f:
-            moga = load(f)
+        with open("results/plan.pkl", "rb") as f:
+            plan = load(f)
 
-        # Clear old solutions
-        moga.population_history = []
+        moga = MOGA(
+            init_pop_size=200,
+            p_mutation=0.30,
+            n_generations=200,
+            maintenance_plan=plan,
+            parallel=True,
+        )
 
+        # Change the number of available resources before to run the algorithm
+        moga.plan.system.resources = r
         # Run the experiment again, without initial population
         moga.run()
         # Save results
@@ -168,8 +174,6 @@ def experiment_from_old_data():
         df = df.sort_values(by="IC", ascending=False)
         fname = "results/paper/r{}.csv".format(r)
         df.to_csv(fname, index=False)
-        results.append(result)
-    return results
 
 def hypervolume_multiple_experiments(results):
     for r in results:
@@ -190,12 +194,15 @@ def hypervolume_multiple_experiments(results):
     # Compute hypervolumes
     hv = []
     for r in result:
-        hv.append(r.hypervolume_indicator())
+        hv.append(r.hypervolume_indicator(
+            1000000, lf_max, lf_min, ic_max, ic_min
+        ))
     data = {i: hv for i, hv in enumerate(hv)}
     df = pd.DataFrame(data)
     df.to_csv("results/paper/hv_values.csv", index=False)
 
 
 if __name__ == "__main__":
-    results = experiment_from_old_data()
-    hypervolume_multiple_experiments(results)
+    experiment_from_old_data()
+    # hypervolume_multiple_experiments(results)
+    # repeat_random_experiment(10)

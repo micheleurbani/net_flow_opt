@@ -526,7 +526,6 @@ class MOGAResults(object):
 
     @staticmethod
     def generation_HV(n_sample, list_of_scores, bounds):
-        print(list_of_scores)
         lf_max, lf_min, ic_max, ic_min = bounds
         dominated = 0
         for _ in range(n_sample):
