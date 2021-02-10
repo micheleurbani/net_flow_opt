@@ -175,6 +175,7 @@ def experiment_from_old_data():
         fname = "results/paper/r{}.csv".format(r)
         df.to_csv(fname, index=False)
 
+
 def hypervolume_multiple_experiments(results):
     for r in results:
         assert type(r) is MOGAResults
