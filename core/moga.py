@@ -563,7 +563,7 @@ class MOGAResults(object):
 
         # Retrieve the list of scores
         scores = [
-            [(ind.plan.LF, ind.plan.IC) for ind in generation if ind.rank==1]
+            [(ind.plan.LF, ind.plan.IC) for ind in generation if ind.rank == 1]
             for generation in self.moga.population_history
         ]
         # Wrap bounds in a tuple

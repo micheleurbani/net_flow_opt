@@ -171,6 +171,7 @@ def experiment_from_old_data():
         results.append(result)
     return results
 
+
 def hypervolume_multiple_experiments(results):
     for r in results:
         assert type(r) is MOGAResults

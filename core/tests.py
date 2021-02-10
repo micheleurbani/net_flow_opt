@@ -144,16 +144,6 @@ class PlanTestCase(unittest.TestCase):
             original_plan=self.plan,
         )
 
-    def test_separate_activities(self):
-        sgm = np.zeros((self.plan.N, self.plan.N), dtype=int)
-        sgm = np.fill_diagonal(sgm, 1)
-        plan = Plan(
-            activities=self.activities,
-            system=self.system,
-            grouping_structure=sgm,
-            original_plan=self.plan,
-        )
-
     def test_gantt_chart(self):
         self.assertIsInstance(
             self.plan.plot_gantt_chart(),
