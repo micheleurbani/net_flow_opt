@@ -1,4 +1,5 @@
 
+import numpy as np
 import pandas as pd
 import networkx as nx
 from pickle import load
@@ -13,7 +14,6 @@ from core.scheduler import Activity, Plan
 from core.utils import components, structure, activities_duration
 
 
-seed(123)
 resources = [2, 3, 4]
 
 
@@ -156,6 +156,9 @@ def experiment_from_old_data():
             maintenance_plan=plan,
             parallel=True,
         )
+        moga.seed = r
+        seed(moga.seed)
+        np.random.seed(moga.seed)
 
         # Change the number of available resources before to run the algorithm
         moga.plan.system.resources = r
