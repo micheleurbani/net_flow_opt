@@ -544,8 +544,8 @@ class MOGAResults(object):
         """
         The method calculates the hyper-volume (HV) indicator of each
         generation and returns the series of points required to plot it.
-        It is required to provide :math:`LF_{min}`, :math:`LF_{max}`,
-        :math:`IC_{max}`, and :math:`IC_{mix}` so that several HV curves can be
+        It is required to provide :math:`LF_{max}`, :math:`LF_{min}`,
+        :math:`IC_{max}`, and :math:`IC_{min}` so that several HV curves can be
         compared.
 
         :params int n_sample: the number of sample points used to evaluate the

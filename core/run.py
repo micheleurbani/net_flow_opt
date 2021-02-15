@@ -197,16 +197,20 @@ def hypervolume_multiple_experiments(results):
                     ic_min = ind.plan.IC
     # Compute hypervolumes
     hv = []
-    for r in result:
+    for r in results:
         hv.append(r.hypervolume_indicator(
-            1000000, lf_max, lf_min, ic_max, ic_min
+            n_samples, lf_max, lf_min, ic_max, ic_min
         ))
     data = {i: hv for i, hv in enumerate(hv)}
     df = pd.DataFrame(data)
-    df.to_csv("results/paper/hv_values.csv", index=False)
+    df.to_csv("results/rng_test/hv_values.csv")
 
 
 if __name__ == "__main__":
-    experiment_from_old_data()
-    # hypervolume_multiple_experiments(results)
-    # repeat_random_experiment(10)
+    # experiment_from_old_data()
+    results = []
+    for r in [2, 3, 4]:
+        with open(f"results/paper_r{r}.pkl", "rb") as f:
+            moga = load(f)
+        results.append(MOGAResults(moga))
+    hypervolume_multiple_experiments(results, 1000000)
