@@ -154,7 +154,7 @@ def experiment_from_old_data():
             p_mutation=0.30,
             n_generations=200,
             maintenance_plan=plan,
-            parallel=True,
+            parallel=False,
         )
         moga.seed = r
         seed(moga.seed)
@@ -179,7 +179,15 @@ def experiment_from_old_data():
         df.to_csv(fname, index=False)
 
 
-def hypervolume_multiple_experiments(results):
+def hypervolume_multiple_experiments(results, n_samples):
+    """
+    Wrapper to run the hypervolume test on multiple instances of the experiment
+    with common bounds for generation of samples.
+
+    :param list results: a list of :class:`core.moga.MOGAResults`.
+    :param int n_samples: the number of samples to use to run the HV test.
+    """
+    np.random.seed(12345)
     for r in results:
         assert type(r) is MOGAResults
     # Find bounds for calculation of the hypervolume
