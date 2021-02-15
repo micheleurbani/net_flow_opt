@@ -145,20 +145,20 @@ def repeat_random_experiment(n):
 
 
 def experiment_from_old_data():
+    seed(12345)
+    np.random.seed(12345)
+
     for r in [2, 3, 4]:
         with open("results/plan.pkl", "rb") as f:
             plan = load(f)
 
         moga = MOGA(
             init_pop_size=200,
-            p_mutation=0.30,
-            n_generations=200,
+            p_mutation=0.3,
+            n_generations=150,
             maintenance_plan=plan,
             parallel=False,
         )
-        moga.seed = r
-        seed(moga.seed)
-        np.random.seed(moga.seed)
 
         # Change the number of available resources before to run the algorithm
         moga.plan.system.resources = r
