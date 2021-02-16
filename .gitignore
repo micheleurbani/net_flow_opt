@@ -4,7 +4,10 @@ venv/
 __*/
 cached_data/
 results/
+source/
 
 # Files
 .env
 graph.png
+make.bat
+Makefile
