@@ -8,8 +8,10 @@ Welcome to net_flow_opt's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
 
+   core/system
+   core/scheduler
+   core/moga
 
 
 Indices and tables

@@ -18,8 +18,8 @@ class Individual(object):
     The object contains useful information for the MOGA about the individual.
 
     :param network_system: a :class:`core.system.System` object containing
-    system information
-
+    system information.
+    :return:
     """
 
     def __init__(self, plan):
@@ -97,6 +97,7 @@ class MOGA(object):
     :class:`core.scheduler.Plan`.
     :param bool parallel: whether to run the parallelized version of the
     algorithm or not.
+
     """
 
     def __init__(
@@ -118,6 +119,7 @@ class MOGA(object):
         """
         The method runs the algorithm until the ``stopping_criteria`` is not
         met and it returns the last generation of individuals.
+
         """
         # Generate the initial population
         if initial_population is None:
@@ -260,6 +262,7 @@ class MOGA(object):
 
         :return: a list of :class:`core.moga.Individual` objects with the new
         assignment matrices.
+
         """
         population = [ind.plan.grouping_structure for ind
                       in initial_population]
@@ -280,6 +283,7 @@ class MOGA(object):
         The method removes the duplicates in the population.
 
         :return: a list of :class:`core.moga.Individual` objects.
+
         """
         n = len(population)
         # Remove duplicates
@@ -420,6 +424,7 @@ class MOGA(object):
         """
         Pickle the object and save it in the folder `results` with name
         `fname`.
+
         """
         if "results" not in listdir():
             mkdir("results")
@@ -458,6 +463,7 @@ class MOGAResults(object):
         generation, and ID of each solution.
 
         :return: a :class:`pandas.DataFrame` object.
+
         """
         df = []
         for generation, population in enumerate(self.moga.population_history):
@@ -475,8 +481,11 @@ class MOGAResults(object):
         return df
 
     def pareto_front(self):
-        """Returns a scatter plot representig the Pareto front of the last
-        generation."""
+        """
+        Returns a scatter plot representig the Pareto front of the last
+        generation.
+
+        """
         df = self.to_dataframe()
         # Filter only the last generation
         df = df[df.generation == df.generation.max()]

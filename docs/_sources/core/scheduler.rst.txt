@@ -1,0 +1,10 @@
+
+The scheduler module
+====================
+
+It contains the data structures required to model a maintenance plan and its
+utilities.
+
+.. automodule:: core.scheduler
+   :members:
+   :undoc-members:
