@@ -211,14 +211,14 @@ def hypervolume_multiple_experiments(results, n_samples):
         ))
     data = {i: hv for i, hv in enumerate(hv)}
     df = pd.DataFrame(data)
-    df.to_csv("results/rng_test/hv_values.csv")
+    df.to_csv("results/more_resources/hv_values.csv")
 
 
 if __name__ == "__main__":
     # experiment_from_old_data()
     results = []
-    for r in [2, 3, 4]:
-        with open(f"results/paper_r{r}.pkl", "rb") as f:
+    for r in [2, 3, 4, 6]:
+        with open(f"results/r{r}.pkl", "rb") as f:
             moga = load(f)
         results.append(MOGAResults(moga))
     hypervolume_multiple_experiments(results, 1000000)

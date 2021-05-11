@@ -145,6 +145,7 @@ solution_analysis_contents = html.Div(
     id="solution_analysis_contents",
     children=[
         load_model,
+        html.Br(),
         pareto_front,
         load_solution,
         gantt_chart,
