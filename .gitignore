@@ -5,6 +5,7 @@ __*/
 cached_data/
 results/
 source/
+data/
 
 # Files
 .env
