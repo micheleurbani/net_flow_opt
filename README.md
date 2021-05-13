@@ -1,8 +1,7 @@
 # NetFlowOpt: resolve maintenance scheduling on networked systems
 
 The repository contains support software to run the model presented in the
-paper **Maintenance optimization on a network flow problem: a bi-objective
-approach**.
+paper *An approach for bi-objective maintenance scheduling on a networked system with limited resources*.
 To run the model, a GUI was built using Plotly Dash and it is thus available
 as a web-app.
 
@@ -27,10 +26,10 @@ In the folder where you want to store the project, run the following code from
 the command line.
 
 ```
-python -m venv venv
-source venv/bin/activate
-(venv) pip install -r requirements.txt
-(venv) python wsgy.py
+$ python -m venv venv
+$ source venv/bin/activate
+$ (venv) pip install -r requirements.txt
+$ (venv) python wsgy.py
 # Load the site at http://127.0.0.1:5010
 ```
 
