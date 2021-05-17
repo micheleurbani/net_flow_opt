@@ -28,7 +28,9 @@ system_model = pd.DataFrame(
         "beta" : [0.0, 0.0],
         "C_p" : [0.0, 0.0],
         "C_c" : [0.0, 0.0],
-        "Successors":['0', '0']
+        "capacity": [0.0, 0.0],
+        "duration": [0.0, 0.0],
+        "successors":['0', '0']
     }
 )
 
@@ -48,6 +50,10 @@ components_table = html.Div(children=[
     html.H3("Component Parameters"),
     html.P("The paramtes of components can be declared using the table below.\
         The meaning of each paramter is explained in the following."),
+    dbc.Button("Add Row", id='editing-rows-button',
+               color="primary", n_clicks=0),
+    html.Br(),
+    html.Br(),
     html.Div(id="div-table", children=[
     dash_table.DataTable(
         id='table-component-parameters',
@@ -56,10 +62,6 @@ components_table = html.Div(children=[
         columns=[{"name": i, "id": i} for i in system_model.columns],
         data=system_model.to_dict('records'),
     )]),
-    html.Br(),
-    dbc.Button("Add Row", id='editing-rows-button',
-               color="primary", n_clicks=0),
-    html.Br(),
     html.Br(),
     dbc.InputGroup(
         [
@@ -167,8 +169,8 @@ def components_contents_callbacks(app):
         # Add edges
         edges = []
         for node in data:
-            if node['Successors'] != '0':
-                for target in ast.literal_eval(node['Successors']):
+            if node['successors'] != '0':
+                for target in ast.literal_eval(node['successors']):
                     edges.append(
                         {'data': {
                             'id': '#' + node['label'] + target,
@@ -198,7 +200,7 @@ def components_contents_callbacks(app):
             id='cytoscape-graph',
             layout={
                 'name': 'cose',
-                # 'roots': '#s, #t'
+                'roots': '#s, #t'
             },
             style={'width': '100%', 'height': '400px'},
             elements=elements + edges,
