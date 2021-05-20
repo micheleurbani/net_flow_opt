@@ -20,7 +20,14 @@ html_layout = """
             <div class="container">
             {%app_entry%}
             </div>
-            <footer>
+            <footer class="bd-footer">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-10">
+                            <p>&copy; Michele Urbani - 2021</p>
+                        </div>
+                    </div>
+                </div>
                 {%config%}
                 {%scripts%}
                 {%renderer%}

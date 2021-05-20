@@ -13,6 +13,8 @@ from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 
 
+cyto.load_extra_layouts()
+
 def load_systems():
     fnames = [{"label": i[:-4], "value": i[:-4]} for i in
               os.listdir("data/systems_data")]
@@ -181,8 +183,11 @@ def components_contents_callbacks(app):
         # Add arrows
         stylesheet = [
             {
-                'selector': edge['data']['id'],
-                'style': {'target-arrow-shape': 'triangle'}
+                'selector': 'edge',
+                'style': {
+                    'mid-target-arrow-shape': 'triangle',
+                    'arrow-scale': 2,
+                    }
             }
             for edge in edges
         ]
@@ -191,7 +196,8 @@ def components_contents_callbacks(app):
             {
                 'selector': 'node',
                 'style': {
-                    'label': 'data(id)'
+                    'label': 'data(id)',
+                    'background-color': '#07ABA0',
                 }
             }
         )
@@ -199,8 +205,8 @@ def components_contents_callbacks(app):
         graph = cyto.Cytoscape(
             id='cytoscape-graph',
             layout={
-                'name': 'cose',
-                'roots': '#s, #t'
+                'name': 'klay',
+                # 'roots': '#s, #t'
             },
             style={'width': '100%', 'height': '400px'},
             elements=elements + edges,

@@ -1,4 +1,5 @@
 
+import os
 import pandas as pd
 import networkx as nx
 from random import random
@@ -200,6 +201,7 @@ form = dbc.Form([
         generations,
         html.Br(),
         button_row,
+        html.Br(),
     ]
 )
 
@@ -300,6 +302,5 @@ def moga_settings_callbacks(app):
         if not experiment_name:
             experiment_name = "experiment_" + \
                 datetime.now().strftime("%Y%m%d_%H%M%S") + ".pkl"
-        ga.save(fname=experiment_name)
-
+        ga.save(fname=os.path.join("results", experiment_name))
         return ['waiting']

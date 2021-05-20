@@ -43,7 +43,7 @@ def init_dashboard(server, cache):
                     ],
                     id="card-tabs",
                     card=True,
-                    active_tab="tab-moga-settings"
+                    active_tab="tab-design"
                 )
             ),
             dbc.CardBody(html.Div(id="card-content"))
