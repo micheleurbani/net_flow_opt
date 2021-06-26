@@ -12,7 +12,7 @@ steps:
 1. Design the system structure and set components properties in "System
 design".
 2. Setup the parameters of the multi-objective genetic algorithm (MOGA) in
-"MOGA settings".
+"MOGA settings" and eventually run the algorithm.
 3. Analyze the solution: load the results of an experiment,
 and browse through all the available maintenance plans in the tab "Solution
 analysis".

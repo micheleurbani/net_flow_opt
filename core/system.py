@@ -9,11 +9,10 @@ class Component:
 
     :param float cc: the cost of a corrective intervention.
     :param float cp: the cost of a preventive intervention.
-    :param float alpha: the scale factor of the Weibull 2-paramters
-    distribution.
-    :param float beta: the shape factor of the Weibull 2-paramters
-    distribution.
+    :param float alpha: the scale factor of the Weibull 2-paramters distribution.
+    :param float beta: the shape factor of the Weibull 2-paramters distribution.
     :param float capacity: the amount of material processed per unit of time.
+
 
     """
 

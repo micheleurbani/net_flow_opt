@@ -13,7 +13,7 @@ from .contents.moga_settings import (moga_settings_contents,
                                      moga_settings_callbacks)
 
 
-def init_dashboard(server, cache):
+def init_dashboard(server):
     """Create a Plotly Dash dashboard."""
     dash_app = Dash(
         server=server,
@@ -60,14 +60,14 @@ def init_dashboard(server, cache):
 
     # Initialize callbacks after our app is loaded
     # Pass dash_app as a parameter
-    init_callbacks(dash_app, cache)
+    init_callbacks(dash_app)
 
     return dash_app.server
 
 
-def init_callbacks(app, cache):
+def init_callbacks(app):
     moga_settings_callbacks(app)
-    solution_analysis_callbacks(app, cache)
+    solution_analysis_callbacks(app)
     components_contents_callbacks(app)
 
     # callbacks for the landing page

@@ -56,14 +56,18 @@ components_table = html.Div(children=[
                color="primary", n_clicks=0),
     html.Br(),
     html.Br(),
-    html.Div(id="div-table", children=[
-    dash_table.DataTable(
-        id='table-component-parameters',
-        editable=True,
-        row_deletable=True,
-        columns=[{"name": i, "id": i} for i in system_model.columns],
-        data=system_model.to_dict('records'),
-    )]),
+    html.Div(
+        id="div-table",
+        children=[
+            dash_table.DataTable(
+                id='table-component-parameters',
+                editable=True,
+                row_deletable=True,
+                columns=[{"name": i, "id": i} for i in system_model.columns],
+                data=system_model.to_dict('records'),
+            )
+        ]
+    ),
     html.Br(),
     dbc.InputGroup(
         [
@@ -186,7 +190,7 @@ def components_contents_callbacks(app):
                 'selector': 'edge',
                 'style': {
                     'mid-target-arrow-shape': 'triangle',
-                    'arrow-scale': 2,
+                    'width': 2
                     }
             }
             for edge in edges

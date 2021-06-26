@@ -4,15 +4,16 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
     <title>The scheduler module &#8212; net_flow_opt 0.1 documentation</title>
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
-    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
     <script src="../_static/doctools.js"></script>
-    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Multi-objective genetic algorithm" href="moga.html" />
@@ -33,13 +34,13 @@
 
           <div class="body" role="main">
             
-  <div class="section" id="the-scheduler-module">
+  <section id="the-scheduler-module">
 <h1>The scheduler module<a class="headerlink" href="#the-scheduler-module" title="Permalink to this headline">¶</a></h1>
 <p>It contains the data structures required to model a maintenance plan and its
 utilities.</p>
 <span class="target" id="module-core.scheduler"></span><dl class="py class">
-<dt id="core.scheduler.Activity">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">core.scheduler.</span></code><code class="sig-name descname"><span class="pre">Activity</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">component</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#core.scheduler.Activity" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="core.scheduler.Activity">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">core.scheduler.</span></span><span class="sig-name descname"><span class="pre">Activity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">component</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#core.scheduler.Activity" title="Permalink to this definition">¶</a></dt>
 <dd><p>The object desribes a maintenance activity; this is always associated to a
 group when the activity is added to a plan.</p>
 <dl class="field-list simple">
@@ -51,62 +52,62 @@ group when the activity is added to a plan.</p>
 :param float date: the due date of the activity.
 :param floa duration: the duration of the activity.</p>
 <dl class="py method">
-<dt id="core.scheduler.Activity.ddh">
-<code class="sig-name descname"><span class="pre">ddh</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">delta_t</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#core.scheduler.Activity.ddh" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="core.scheduler.Activity.ddh">
+<span class="sig-name descname"><span class="pre">ddh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">delta_t</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#core.scheduler.Activity.ddh" title="Permalink to this definition">¶</a></dt>
 <dd><p>Second derivative of the penalty function.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="core.scheduler.Activity.dh">
-<code class="sig-name descname"><span class="pre">dh</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">delta_t</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#core.scheduler.Activity.dh" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="core.scheduler.Activity.dh">
+<span class="sig-name descname"><span class="pre">dh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">delta_t</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#core.scheduler.Activity.dh" title="Permalink to this definition">¶</a></dt>
 <dd><p>Derivative of the penalty function.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="core.scheduler.Activity.expectedCost">
-<code class="sig-name descname"><span class="pre">expectedCost</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#core.scheduler.Activity.expectedCost" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="core.scheduler.Activity.expectedCost">
+<span class="sig-name descname"><span class="pre">expectedCost</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#core.scheduler.Activity.expectedCost" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt id="core.scheduler.Activity.h">
-<code class="sig-name descname"><span class="pre">h</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">delta_t</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#core.scheduler.Activity.h" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="core.scheduler.Activity.h">
+<span class="sig-name descname"><span class="pre">h</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">delta_t</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#core.scheduler.Activity.h" title="Permalink to this definition">¶</a></dt>
 <dd><p>Penalty function to defer the component from its PM date.</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
-<dt id="core.scheduler.Group">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">core.scheduler.</span></code><code class="sig-name descname"><span class="pre">Group</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">activities</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#core.scheduler.Group" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="core.scheduler.Group">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">core.scheduler.</span></span><span class="sig-name descname"><span class="pre">Group</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">activities</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#core.scheduler.Group" title="Permalink to this definition">¶</a></dt>
 <dd><p>Describes a group of maintenance activities that are part of a maintenance
 plan. The objects should be used only to find the <em>optimal</em> execution date
 —i.e., the one that minimizes <span class="math notranslate nohighlight">\(IC\)</span>.
 Only the method <a class="reference internal" href="#core.scheduler.Group.minimize" title="core.scheduler.Group.minimize"><code class="xref py py-class docutils literal notranslate"><span class="pre">core.scheduler.Group.minimize</span></code></a> changes the property
 <cite>t_opt</cite> of the activities in the group.</p>
 <dl class="py method">
-<dt id="core.scheduler.Group.H">
-<code class="sig-name descname"><span class="pre">H</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#core.scheduler.Group.H" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="core.scheduler.Group.H">
+<span class="sig-name descname"><span class="pre">H</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#core.scheduler.Group.H" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the expected cost of corrective maintenance of the group.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="core.scheduler.Group.dH">
-<code class="sig-name descname"><span class="pre">dH</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#core.scheduler.Group.dH" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="core.scheduler.Group.dH">
+<span class="sig-name descname"><span class="pre">dH</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#core.scheduler.Group.dH" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt id="core.scheduler.Group.ddH">
-<code class="sig-name descname"><span class="pre">ddH</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#core.scheduler.Group.ddH" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="core.scheduler.Group.ddH">
+<span class="sig-name descname"><span class="pre">ddH</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#core.scheduler.Group.ddH" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt id="core.scheduler.Group.is_feasible">
-<code class="sig-name descname"><span class="pre">is_feasible</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.scheduler.Group.is_feasible" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="core.scheduler.Group.is_feasible">
+<span class="sig-name descname"><span class="pre">is_feasible</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.scheduler.Group.is_feasible" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt id="core.scheduler.Group.minimize">
-<code class="sig-name descname"><span class="pre">minimize</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.scheduler.Group.minimize" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="core.scheduler.Group.minimize">
+<span class="sig-name descname"><span class="pre">minimize</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.scheduler.Group.minimize" title="Permalink to this definition">¶</a></dt>
 <dd><p>Implement the Newton method to find the optimal execution date for the
 group, and the <cite>t_opt</cite> of each component is set to the found date.</p>
 </dd></dl>
@@ -114,8 +115,8 @@ group, and the <cite>t_opt</cite> of each component is set to the found date.</p
 </dd></dl>
 
 <dl class="py class">
-<dt id="core.scheduler.Plan">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">core.scheduler.</span></code><code class="sig-name descname"><span class="pre">Plan</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">activities</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">system</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grouping_structure</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">original_plan</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#core.scheduler.Plan" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="core.scheduler.Plan">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">core.scheduler.</span></span><span class="sig-name descname"><span class="pre">Plan</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">activities</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">system</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grouping_structure</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">original_plan</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#core.scheduler.Plan" title="Permalink to this definition">¶</a></dt>
 <dd><p>The object describes a generic maintenance plan, i.e. a list of activities
 with the associated maintenance date.</p>
 <dl class="field-list simple">
@@ -127,8 +128,8 @@ with the associated maintenance date.</p>
 </dd>
 </dl>
 <dl class="py method">
-<dt id="core.scheduler.Plan.evaluate_flow_reduction">
-<code class="sig-name descname"><span class="pre">evaluate_flow_reduction</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.scheduler.Plan.evaluate_flow_reduction" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="core.scheduler.Plan.evaluate_flow_reduction">
+<span class="sig-name descname"><span class="pre">evaluate_flow_reduction</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.scheduler.Plan.evaluate_flow_reduction" title="Permalink to this definition">¶</a></dt>
 <dd><p>The method returns the total reduction of flow with respect to the
 nominal capacity; the latter is the rate of material, or work, that is
 processed per unit of time.</p>
@@ -138,8 +139,8 @@ processed per unit of time.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="core.scheduler.Plan.generate_flow_history">
-<code class="sig-name descname"><span class="pre">generate_flow_history</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.scheduler.Plan.generate_flow_history" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="core.scheduler.Plan.generate_flow_history">
+<span class="sig-name descname"><span class="pre">generate_flow_history</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.scheduler.Plan.generate_flow_history" title="Permalink to this definition">¶</a></dt>
 <dd><p>The method retuns the dictionary obtained by evaluating
 <a href="#id1"><span class="problematic" id="id2">:method:`core.scheduler.generate_structure_history`</span></a> enriched with the
 value maximum flow value under the specific system configurations.
@@ -164,15 +165,15 @@ configuration.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="core.scheduler.Plan.generate_random_assignment_matrix">
-<code class="sig-name descname"><span class="pre">generate_random_assignment_matrix</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.scheduler.Plan.generate_random_assignment_matrix" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="core.scheduler.Plan.generate_random_assignment_matrix">
+<span class="sig-name descname"><span class="pre">generate_random_assignment_matrix</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.scheduler.Plan.generate_random_assignment_matrix" title="Permalink to this definition">¶</a></dt>
 <dd><p>The method generates a random assignment matrix, which might
 generate an infeasible maintenance plan.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="core.scheduler.Plan.generate_structure_history">
-<code class="sig-name descname"><span class="pre">generate_structure_history</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.scheduler.Plan.generate_structure_history" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="core.scheduler.Plan.generate_structure_history">
+<span class="sig-name descname"><span class="pre">generate_structure_history</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.scheduler.Plan.generate_structure_history" title="Permalink to this definition">¶</a></dt>
 <dd><p>The method returns a list of system configurations and their start
 date.</p>
 <dl class="field-list simple">
@@ -186,21 +187,21 @@ of the configuration.
 </dd></dl>
 
 <dl class="py method">
-<dt id="core.scheduler.Plan.plot_flow_history">
-<code class="sig-name descname"><span class="pre">plot_flow_history</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.scheduler.Plan.plot_flow_history" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="core.scheduler.Plan.plot_flow_history">
+<span class="sig-name descname"><span class="pre">plot_flow_history</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.scheduler.Plan.plot_flow_history" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a Plotly Dash figure object representing the flow value as
 a function of time.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="core.scheduler.Plan.plot_gantt_chart">
-<code class="sig-name descname"><span class="pre">plot_gantt_chart</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.scheduler.Plan.plot_gantt_chart" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="core.scheduler.Plan.plot_gantt_chart">
+<span class="sig-name descname"><span class="pre">plot_gantt_chart</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.scheduler.Plan.plot_gantt_chart" title="Permalink to this definition">¶</a></dt>
 <dd><p>The method returns a <code class="xref py py-class docutils literal notranslate"><span class="pre">plotly.express.timeline</span></code> object.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="core.scheduler.Plan.set_dates">
-<code class="sig-name descname"><span class="pre">set_dates</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_plan</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#core.scheduler.Plan.set_dates" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="core.scheduler.Plan.set_dates">
+<span class="sig-name descname"><span class="pre">set_dates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_plan</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#core.scheduler.Plan.set_dates" title="Permalink to this definition">¶</a></dt>
 <dd><p>Implement the whole optimization procedure: firstly, activities are
 scheduled at group date, and subsequently they are ordered according to
 group date. Finally, the trust region constrained algorithm is used to
@@ -215,14 +216,14 @@ The IC of the plan is updated when activities are deferred.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="core.scheduler.Plan.set_resources">
-<code class="sig-name descname"><span class="pre">set_resources</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.scheduler.Plan.set_resources" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="core.scheduler.Plan.set_resources">
+<span class="sig-name descname"><span class="pre">set_resources</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.scheduler.Plan.set_resources" title="Permalink to this definition">¶</a></dt>
 <dd><p>Store the resource id in each activity.</p>
 </dd></dl>
 
 </dd></dl>
 
-</div>
+</section>
 
 
           </div>
@@ -245,6 +246,9 @@ The IC of the plan is updated when activities are deferred.</p>
 <li class="toctree-l1"><a class="reference internal" href="system.html">The system module</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">The scheduler module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="moga.html">Multi-objective genetic algorithm</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="run.html">Get started with NetFlowOpt</a></li>
 </ul>
 
 <div class="relations">
@@ -282,7 +286,7 @@ The IC of the plan is updated when activities are deferred.</p>
       &copy;2021, Michele Urbani.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.0.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

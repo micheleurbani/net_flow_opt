@@ -5,7 +5,6 @@ from flask import (Blueprint,
                    redirect,
                    url_for,
                    send_from_directory)
-from flask_login import logout_user, login_required
 
 
 # Blueprint Configuration
@@ -30,7 +29,6 @@ def home():
 
 
 @main_bp.route("/logout")
-@login_required
 def logout():
     """User log-out logic."""
     logout_user()
@@ -38,13 +36,11 @@ def logout():
 
 
 @main_bp.route("/dashapp")
-@login_required
 def dashapp():
     return redirect(url_for('/dashapp/'))
 
 
 @main_bp.route("/dashapp/download/<path:filename>")
-@login_required
 def download(filename):
     return send_from_directory(
         main_bp.static_folder,

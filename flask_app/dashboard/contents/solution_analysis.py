@@ -156,15 +156,13 @@ solution_analysis_contents = html.Div(
 )
 
 
-def solution_analysis_callbacks(app, cache):
+def solution_analysis_callbacks(app):
 
-    @cache.memoize()
     def load_data(model_name):
         with open('results/' + model_name, 'rb') as f:
             ga = MOGAResults(load(f))
         return ga
 
-    @cache.memoize()
     def load_last_generation(model_name):
         with open('results/' + model_name, 'rb') as f:
             ga = MOGAResults(load(f))
@@ -259,3 +257,12 @@ def solution_analysis_callbacks(app, cache):
                 return gantt, flow
             else:
                 return [], []
+
+    @app.callback(
+        Output("models-dropdown", "options"),
+        Input("solution_analysis_contents", "n_clicks")
+    )
+    def change_my_dropdown_options(n_clicks):
+        if n_clicks is None:
+            raise PreventUpdate
+        return load_models()
