@@ -1,37 +1,23 @@
 # NetFlowOpt: resolve maintenance scheduling on networked systems
 
 The repository contains support software to run the model presented in the
-paper *An approach for bi-objective maintenance scheduling on a networked system with limited resources*.
-To run the model, a GUI was built using Plotly Dash and it is thus available
-as a web-app.
+paper *An approach for bi-objective maintenance scheduling on a networked
+system with limited resources*.
+The model is implemented in web-based app, which can be run using a Docker
+container.
 
 ## Get started
 
-Right now, the only way to access the GUI is through `virtualenv` and running
-the Flask development server.
-In the future, support for deplooyment in Docker will be available.
+### Docker
 
-Clone the project in the desired folder:
+Be sure that you installed Docker and that it is running.
+Run the following commands in a terminal to build the image and run the
+container.
 
-```
-$ git clone https://github.com/mikiurbi/net_flow_opt.git
-$ cd net_flow_opt
-```
+    docker compose build
+    docker compose up -d
 
-It is necessary to install PostgreSQL database, and to create a databese named `flask_app`.
-
-### Pip
-
-In the folder where you want to store the project, run the following code from
-the command line.
-
-```
-$ python -m venv venv
-$ source venv/bin/activate
-$ (venv) pip install -r requirements.txt
-$ (venv) python wsgy.py
-# Load the site at http://127.0.0.1:5010
-```
+Then, nevigate to `localhost:5000` in your web browser and start using the app.
 
 ### Documentation
 
