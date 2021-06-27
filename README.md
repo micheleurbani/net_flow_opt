@@ -17,7 +17,7 @@ container.
     docker compose build
     docker compose up -d
 
-Then, nevigate to `localhost:5000` in your web browser and start using the app.
+Then, navigate to `localhost:5000` in your web browser and start using the app.
 
 ### Documentation
 
