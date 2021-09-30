@@ -24,6 +24,50 @@ class State(object):
     def energy(self, temperature):
         raise NotImplementedError
 
+    def perturbation(self, p_mutation, original_plan):
+        """
+        The method perturbates a solution by applying the same mutation that
+        is used in `core.moga.Individual.muation`.
+        """
+        x = deepcopy(self.plan.grouping_structure)
+        for i in range(self.plan.N):        # Loop among components
+            if np.random.rand() < p_mutation:     # Sample mutation probability
+                g = []                            # List of candidate groups
+                g_id = np.flatnonzero(x[i, :])[0]
+                for j in range(self.plan.N):
+                    # Avoid to check the component against itself
+                    # and screen the possible groups using the number of
+                    # resources
+                    if j != g_id and np.sum(x[:, j]) < \
+                            self.plan.system.resources:
+                        g.append(j)
+                # Further screen the groups on feasibility
+                f, p = [], []
+                for j in g:
+                    activities = [
+                            self.plan.activities[c] for c in
+                            np.flatnonzero(x[:, j])
+                        ] + [self.plan.activities[i]]
+                    group = Group(activities=activities)
+                    if group.is_feasible():
+                        # Group is feasible update f
+                        f.append(j)
+                        p.append(max([1, group.size]))
+                allele = np.zeros(self.plan.N, dtype=int)
+                assert len(f) < self.plan.N
+                p = np.array(p) / sum(p)
+                allele[np.random.choice(f, p=p)] = 1
+                x[i, :] = allele
+        state = State(
+            plan=Plan(
+                activities=deepcopy(self.plan.activities),
+                system=self.plan.system,
+                grouping_structure=x,
+                original_plan=original_plan,
+            )
+        )
+        return state
+
 
 class AMOSA(object):
     """
