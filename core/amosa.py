@@ -21,6 +21,26 @@ class State(object):
         return '<State LF:{LF:.2f} IC:{IC:.2f}>'.format(LF=self.score[0],
                                                         IC=self.score[1])
 
+    def __le__(self, a):
+        """
+        Define the dominance relationship. Returns true if the current solution
+        dominates `a`.
+        """
+        if self.score[0] < a.score[0] and self.score[1] < a.score[1]:
+            return True
+        else:
+            return False
+
+    def nondominated(self, a):
+        """
+        Returns true if the actual solution is a nondomination relationship
+        with the solution `a`.
+        """
+        if self.score[0] > a.score[0] and self.score[1] > a.score[1]:
+            return False
+        else:
+            return True
+
     def energy(self, temperature):
         raise NotImplementedError
 
