@@ -80,3 +80,157 @@ class AMOSA(object):
         `s` and `q` are the current and the previous state respectively.
         """
         return 1 / (1 + np.exp((-q.energy - s.energy) / self.T))
+
+    def generate_individual(self, i=None):
+        """
+        The method generates a feasible grouping structure. The following two
+        constraints are satisfied:
+
+        .. math::
+
+            |G| \\le R \\qquad \\forall G \\in grouping\\_structure
+
+            \\min_{c \\in G} \\{t_c + d_c\\} > \\max_{c \\in G} \\{t_c\\}
+            \\qquad \\forall G \\in grouping\\_structure
+
+        where :math:`G` identifies a set of components also called group, which
+        ensure that the optimality of nestde intervals holds.
+
+        :return: a numpy array encoding the grouping structure.
+        :rtype: numpy array
+
+        """
+        # List of components to be assigned to a group
+        R = np.arange(self.plan.N)
+        # Empty array to store the grouping structure
+        S = np.zeros(shape=(self.plan.N, self.plan.N), dtype=int)
+        for i in range(self.plan.N):
+            # Create a local copy of R, which will be used for assignment of
+            # the component to one of the remaining groups
+            Q = np.copy(R)
+            while True:
+                # Create a local copy of S
+                S1 = np.copy(S)
+                # Sample a group from Q
+                j = np.random.randint(len(Q))
+                # Assign the component to the group
+                S1[i, Q[j]] = 1
+                # Check if the date ranges of components in the j-th group are
+                # compatible
+                components = [c for k, c in enumerate(self.plan.activities)
+                              if S1[k, Q[j]] == 1]
+                max_end_date = np.max(np.array([c.t + c.d for c in
+                                                components]))
+                min_begin_date = np.min(np.array([c.t for c in components]))
+                # If the intersection of the date ranges is not an empty set...
+                if max_end_date >= min_begin_date:
+                    # the group is feasible.
+                    # Check if the number of components in the group is lower
+                    # than the number of available resources.
+                    if np.sum(S1[:, Q[j]]) >= self.plan.system.resources:
+                        # The group is full, remove it from R.
+                        for k, c in enumerate(R):
+                            if c == Q[j]:
+                                R = np.delete(R, k)
+                    # Update S and
+                    S = np.copy(S1)
+                    # step to the next component.
+                    break
+                else:
+                    # clear group from the local list of candidate groups
+                    Q = np.delete(Q, j)
+        return S
+
+    def generate_initial_population(self):
+        """
+        Generate an initial population of :class:`core.amosa.State` objects.
+
+        :return: a list of :class:`core.amosa.State` objects.
+        """
+        if self.parallel:
+            with Pool(processes=cpu_count()) as pool:
+                population = pool.map(
+                    self.generate_individual,
+                    range(self.SL - 1)
+                )
+        else:
+            population = [self.generate_individual() for _ in
+                          range(self.SL - 1)]
+        population = [
+            State(
+                plan=Plan(
+                    system=self.plan.system,
+                    activities=deepcopy(self.plan.activities),
+                    grouping_structure=s,
+                    original_plan=self.plan,
+                )
+            ) for s in population
+        ]
+        # Remember to inject artificially the solution with all the activities
+        # executed separately.
+        S = np.zeros((self.plan.N, self.plan.N), dtype=int)
+        for i in range(self.plan.N):
+            S[i, i] = 1
+        population.append(
+            State(
+                plan=Plan(
+                    system=self.plan.system,
+                    activities=deepcopy(self.plan.activities),
+                    grouping_structure=S,
+                    original_plan=self.plan,
+                )
+            )
+        )
+        return population
+
+    def run(self):
+        """
+        The main procedure of the algorithm.
+        """
+        if self.archive is None:
+            self.archive = self.generate_initial_population()
+        # TODO: perform clustering
+        print(self.archive)
+
+        # chose a random solution from the archive
+        current_pt = np.random.choice(self.archive)
+        # generate a new solution by perturbation
+        new_pt = current_pt.perturbation(
+            p_mutation=0.25,
+            original_plan=self.plan
+        )
+
+        # k_set is the set of solutions that dominate new_pt
+        ks = lambda new_pt: np.sum([i for i in self.archive if i <= new_pt])
+
+        while self.T >= self.Tmin:
+            for i in range(self.iter):
+                # current_pt dominates the new_pt and k points from the archive
+                # dominate new_pt
+                if current_pt <= new_pt:
+                    k_set = ks(new_pt=new_pt)
+                    ave_dom = (
+                            np.sum(
+                                [self.domination_amount(i, new_pt)
+                                    for i in k_set]
+                            ) + self.domination_amount(current_pt, new_pt)) / \
+                            (k + 1)
+                    # the new_pt is selected as the current_pr with probability
+                    p = 1 / (1 + np.exp(ave_dom * self.T))
+                    if np.random.rand() <= p:
+                        # set new_pt as current_pt
+                        current_pt = deepcopy(new_pt)
+
+                # current_pt and new_pt are nondominated to each other
+                elif current_pt.nondominated(new_pt):
+                    # check the domination status of new_pt and points in the
+                    # archive
+                    pass
+
+                break
+                # TODO: check if len(self.archive) > SL
+            self.T = self.Tmin - 1
+
+
+if __name__ == '__main__':
+    pass
