@@ -145,6 +145,15 @@ class AMOSA(object):
         """
         return 1 / (1 + np.exp((-q.energy - s.energy) / self.T))
 
+    @staticmethod
+    def domination_amount(a, b):
+        """
+        The amount of domination of a solution `a` with respect to a solution
+        `b`.
+        """
+        return np.prod([np.abs(a.score[i] - b.score[i]) / R_i
+                        for i in range(len(a.score))])
+
     def generate_individual(self, i=None):
         """
         The method generates a feasible grouping structure. The following two
