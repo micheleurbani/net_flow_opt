@@ -519,6 +519,18 @@ class AMOSAResults(object):
         )
         return fig
 
+    def pareto_to_csv(self):
+        """Export the coordinates of the points on the Pareto front in a CSV
+        file, and saves it in the folder `static`."""
+        df = self.to_dataframe()
+        df = df[df.iteration == df.iteration.max()]  # Keep only the last gen
+        # df = df[df["rank"] == 1]  # Keep only point on the Pareto front
+        df = df.filter(["IC", "LF"])  # Keep only the score
+        df = df.drop_duplicates()
+        df = df.sort_values(by="IC", ascending=False)
+        fname = "export.csv"
+        df.to_csv("flask_app/static/" + fname, index=False)
+        return fname
 
 if __name__ == '__main__':
     from .system import Component, System
