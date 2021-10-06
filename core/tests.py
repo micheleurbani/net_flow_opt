@@ -4,12 +4,14 @@ import plotly
 import unittest
 import numpy as np
 import networkx as nx
+from copy import deepcopy
 
 
 from .system import Component, System
+from .utils import components, structure
 from .scheduler import Activity, Group, Plan
 from .moga import Individual, MOGA, MOGAResults
-from .utils import components, structure
+from .amosa import State, AMOSA
 
 
 # Set seed values
@@ -376,6 +378,113 @@ class MOGAResultsTestCase(unittest.TestCase):
                     ic_min = ind.plan.IC
         hv_values = results.hypervolume_indicator(1000, lf_max, lf_min,
                                                   ic_max, ic_min)
+
+
+class StateTestCase(unittest.TestCase):
+
+    def setUp(self):
+        # Create one maintenance activity per component
+        self.activities = [
+            Activity(
+                component=c,
+                date=c.x_star,
+                duration=random.random() * 3 + 1
+            ) for c in components
+        ]
+        self.system = System(
+            structure=structure,
+            resources=3,
+            components=components
+        )
+        self.plan = Plan(
+            activities=self.activities,
+            system=self.system,
+        )
+        self.amosa = AMOSA(
+            HL=20,
+            SL=30,
+            Tmax=1500,
+            Tmin=800,
+            iterations=20,
+            alpha=0.5,
+            maintenance_plan=self.plan,
+        )
+
+    def test_dominance(self):
+        x1 = self.amosa.generate_individual()
+        x2 = self.amosa.generate_individual()
+        state1 = State(
+            plan=Plan(
+                activities=deepcopy(self.activities),
+                system=self.system,grouping_structure=x1,
+                original_plan=self.plan
+            )
+        )
+        state2 = State(
+            plan=Plan(
+                activities=deepcopy(self.activities),
+                system=self.system,grouping_structure=x2,
+                original_plan=self.plan
+            )
+        )
+        self.assertFalse(state1 <= state2)
+        self.assertFalse(state2 <= state1)
+        state3 = state2.perturbation(0.25, self.plan)
+        self.assertTrue(state2 <= state3)
+
+    def test_nondimination(self):
+        x1 = self.amosa.generate_individual()
+        x2 = self.amosa.generate_individual()
+        state1 = State(
+            plan=Plan(
+                activities=deepcopy(self.activities),
+                system=self.system,grouping_structure=x1,
+                original_plan=self.plan
+            )
+        )
+        state2 = State(
+            plan=Plan(
+                activities=deepcopy(self.activities),
+                system=self.system,grouping_structure=x2,
+                original_plan=self.plan
+            )
+        )
+        self.assertTrue(state1.nondominated(state2))
+        self.assertTrue(state2.nondominated(state1))
+
+
+class AMOSATestCase(unittest.TestCase):
+
+    def setUp(self):
+        # Create one maintenance activity per component
+        self.activities = [
+            Activity(
+                component=c,
+                date=c.x_star,
+                duration=random.random() * 3 + 1
+            ) for c in components
+        ]
+        self.system = System(
+            structure=structure,
+            resources=3,
+            components=components
+        )
+        self.plan = Plan(
+            activities=self.activities,
+            system=self.system,
+        )
+        self.amosa = AMOSA(
+            HL=20,
+            SL=5,
+            Tmax=1500,
+            Tmin=800,
+            iterations=20,
+            alpha=0.95,
+            maintenance_plan=self.plan,
+        )
+
+    def test_run(self):
+        self.amosa.run()
 
 
 if __name__ == "__main__":

@@ -1,10 +1,10 @@
 
+import random
 import numpy as np
 from copy import deepcopy
 from multiprocessing import Pool, cpu_count
 
 
-from .moga import Individual
 from .scheduler import Group, Plan
 
 
@@ -33,16 +33,14 @@ class State(object):
 
     def nondominated(self, a):
         """
-        Returns true if the actual solution is a nondomination relationship
+        Returns true if the actual solution is in a nondomination relationship
         with the solution `a`.
         """
-        if self.score[0] > a.score[0] and self.score[1] > a.score[1]:
+        if (self.score[0] > a.score[0] and self.score[1] > a.score[1]) or \
+            (self.score[0] < a.score[0] and self.score[1] < a.score[1]):
             return False
         else:
             return True
-
-    def energy(self, temperature):
-        raise NotImplementedError
 
     def perturbation(self, p_mutation, original_plan):
         """
@@ -129,30 +127,107 @@ class AMOSA(object):
         self.Tmax = Tmax
         self.T = Tmax
         self.iter = iterations
+        assert alpha < 1
         self.alpha = alpha
         self.archive = None
         self.plan = maintenance_plan
         self.parallel = parallel
+        self.solution_history = []
 
-    def selection_probability(self, s, q):
+    def range(self, i):
         """
-        The selection probability is computer according to the follwing
-        equation:
-
-            p_{s, q} = \\frac{1}{1 + \\exp \\frac{-E(q, T) - E(s, T)}{T}}
-
-        `s` and `q` are the current and the previous state respectively.
+        Since the range of an objective i is not known a priori, it is computed
+        using the actual archive of solutions.
         """
-        return 1 / (1 + np.exp((-q.energy - s.energy) / self.T))
+        a = min([j.score[i] for j in self.archive])
+        b = max([j.score[i] for j in self.archive])
+        return abs(b - a)
 
-    @staticmethod
-    def domination_amount(a, b):
+    def domination_amount(self, a, b):
         """
         The amount of domination of a solution `a` with respect to a solution
         `b`.
         """
-        return np.prod([np.abs(a.score[i] - b.score[i]) / R_i
+        return np.prod([np.abs(a.score[i] - b.score[i]) / self.range(i)
                         for i in range(len(a.score))])
+
+    def p(self, x):
+        """
+        Given the dominance amount, it computes the selection probability of a
+        solution.
+        """
+        return 1 / (1 + np.exp(x * self.T))
+
+    def clustering(self):
+        """
+        The single linkage algorithm is used to perform clustering.
+        """
+        # define the distance matrix
+        d = np.zeros((len(self.archive), len(self.archive)))
+        for i in range(len(self.archive)):
+            for j in range(i+1, len(self.archive)):
+                d[i, j] = np.sqrt(
+                    np.sum(
+                        [(self.archive[i].score[k] +
+                            self.archive[j].score[k])**2
+                                for k in range(len(self.archive[i].score))]
+                    )
+                )
+        # filter out zero from thresholds
+        thresholds = [i for i in np.sort(np.unique(d)) if i != 0]
+        # allocate empty matrix for conn_old
+        conn_old = np.zeros_like(d)
+        # create the first cluster structure
+        clusters = [(i,) for i in self.archive]
+        for t in thresholds:
+            conn = np.zeros_like(d)
+            # the connections with dissimilarity t
+            conn[(d > 0) & (d <= t)] = 1
+            # the new connection to add
+            new_conn = conn - conn_old
+            # update old_conn to the actual structure of connections
+            conn_old = conn
+            # new elements to be connected
+            i, j = new_conn.nonzero()
+            temp_clusters = []
+            for node in [i, j]:
+                if temp_clusters and \
+                    self.archive[int(node)] in temp_clusters[0]:
+                    break
+                k = 0
+                while not self.archive[int(node)] in clusters[k]:
+                    k += 1
+                temp_clusters.append(clusters.pop(k))
+            if len(temp_clusters) == 1:
+                clusters.append(temp_clusters[0])
+            else:
+                clusters.append(temp_clusters[0] + temp_clusters[1])
+            # when ther's only one cluster, then stop
+            if len(clusters) == 1: break
+            # if there are self.HL clusters then group
+            if len(clusters) == self.HL:
+                for i in range(len(clusters)):
+                    if len(clusters[i]) == 2:
+                        del clusters[i][random.randint(0,
+                            len(clusters[i]) - 1)]
+                    # keep the solution with the minimum average distance
+                    elif len(clusters[i]) > 2:
+                        ave_dist = []
+                        for j in clusters[i]:
+                            ave_dist.append(
+                                np.sum(
+                                    [np.sqrt(
+                                        np.sum(
+                                            [(j.score[l] + k.score[l])**2
+                                                for l in range(len(j.score))]
+                                        )
+                                    ) for k in clusters[i]]
+                                ) / len(clusters[i])
+                            )
+                        clusters[i] = (clusters[i][np.argmin(ave_dist)],)
+                break
+        self.archive = [i[0] for i in clusters]
+
 
     def generate_individual(self, i=None):
         """
@@ -262,48 +337,142 @@ class AMOSA(object):
         """
         if self.archive is None:
             self.archive = self.generate_initial_population()
+        print('Initial population')
+        print(self.archive)
         # TODO: perform clustering
+        self.clustering()
+        print('Perform clustering ...')
         print(self.archive)
 
         # chose a random solution from the archive
         current_pt = np.random.choice(self.archive)
-        # generate a new solution by perturbation
-        new_pt = current_pt.perturbation(
-            p_mutation=0.25,
-            original_plan=self.plan
-        )
-
-        # k_set is the set of solutions that dominate new_pt
-        ks = lambda new_pt: np.sum([i for i in self.archive if i <= new_pt])
-
+        j = 0
         while self.T >= self.Tmin:
+            print(f'================ Iteration {j} T: {self.T} ==============')
             for i in range(self.iter):
+                # generate a new solution by perturbation
+                new_pt = current_pt.perturbation(
+                    p_mutation=0.25,
+                    original_plan=self.plan
+                )
+                print('new_pt: ', new_pt)
+                # k_set is the set of solutions that dominate new_pt
+                k_set = [i for i in self.archive if i <= new_pt]
+                # d_set is the set containing the solutions dominated by new_pt
+                d_set = [i for i in self.archive if new_pt <= i]
                 # current_pt dominates the new_pt and k points from the archive
                 # dominate new_pt
+                print('iteration ', i, current_pt)
                 if current_pt <= new_pt:
-                    k_set = ks(new_pt=new_pt)
-                    ave_dom = (
-                            np.sum(
+                    print('current_pt <= new_pt')
+                    ave_dom = (sum(
                                 [self.domination_amount(i, new_pt)
                                     for i in k_set]
                             ) + self.domination_amount(current_pt, new_pt)) / \
-                            (k + 1)
+                            (len(k_set) + 1)
+                    print('ave_dom:', ave_dom, 'p:', self.p(ave_dom))
                     # the new_pt is selected as the current_pr with probability
-                    p = 1 / (1 + np.exp(ave_dom * self.T))
-                    if np.random.rand() <= p:
+                    if np.random.rand() <= self.p(ave_dom):
                         # set new_pt as current_pt
-                        current_pt = deepcopy(new_pt)
+                        current_pt = new_pt
+                    print('iteration:', i, current_pt)
 
                 # current_pt and new_pt are nondominated to each other
                 elif current_pt.nondominated(new_pt):
-                    # check the domination status of new_pt and points in the
-                    # archive
-                    pass
-
-                break
-                # TODO: check if len(self.archive) > SL
-            self.T = self.Tmin - 1
+                    print('current_pt nondominated by new_pt')
+                    # check the domination status of new_pt against the points
+                    # in the archive
+                    # case 2a: new_pt is dominated by k points
+                    if len(k_set) >= 1:
+                        print(f'new_pt is dominated by {len(k_set)} points')
+                        ave_dom = sum([self.domination_amount(i, new_pt)
+                                       for i in self.archive]) / len(k_set)
+                        print('ave_dom:', ave_dom, 'p:', self.p(ave_dom))
+                        if np.random.rand() <= self.p(ave_dom):
+                            # set new_pt as current_pt
+                            current_pt = new_pt
+                    # case 2b: new_pt is nondominating with respect to the
+                    # other points in the archive
+                    elif len(k_set) == 0:
+                        print('new_pt is nondominating with respect to the',
+                            'other points in the archive')
+                        self.archive.append(deepcopy(new_pt))
+                        current_pt = new_pt
+                        if len(self.archive) >= self.SL:
+                            self.clustering()
+                    # case 2c: new_pt dominates k points in the archive
+                    elif len(d_set) >= 1:
+                        print(f'new_pt dominates {len(d_set)} points in the archive')
+                        current_pt = new_pt
+                        self.archive.append(deepcopy(new_pt))
+                        for i in d_set:
+                            self.archive.remove(i)
+                    else:
+                        raise NotImplementedError
+                elif new_pt <= current_pt:
+                    print('new_tp <= current_pt')
+                    # new_pt dominates current_pt but k points in the archive
+                    # dominate new_pt
+                    if len(k_set) >= 1:
+                        domination_amounts = [self.domination_amount(i, new_pt)
+                                            for i in self.archive]
+                        if np.random.rand() <= p(-min(domination_amounts)):
+                            current_pt = self.archive[
+                                np.argmin(domination_amounts)]
+                        else:
+                            current_pt = new_pt
+                        self.archive.append(current_pt)
+                    # new_pt is nondominating with respect to the points in the
+                    # archive except current_pt if it belongs to the archive
+                    elif len(k_set) == 0 and len(d_set) == 0:
+                        if current_pt in self.archive:
+                            self.archive.remove(current_pt)
+                        current_pt = deepcopy(new_pt)
+                        self.archive.append(current_pt)
+                    elif len(k_set) == 0 and len(d_set) >= 1:
+                        # remove solutions dominated by new_pt
+                        self.archive = [i for i in self.archive
+                                        if not new_pt <= i]
+                        current_pt = deepcopy(new_pt)
+                        self.archive.append(current_pt)
+                if len(self.archive) > self.SL:
+                    self.clustering()
+            self.T = self.alpha * self.T
+            print(self.archive)
 
 
 if __name__ == '__main__':
-    pass
+    from .system import Component, System
+    from .utils import components, structure
+    from .scheduler import Activity, Group, Plan
+    from .amosa import State, AMOSA
+    random.seed(123)
+    np.random.seed(123)
+    # Create one maintenance activity per component
+    activities = [
+        Activity(
+            component=c,
+            date=c.x_star,
+            duration=random.random() * 3 + 1
+        ) for c in components
+    ]
+    system = System(
+        structure=structure,
+        resources=3,
+        components=components
+    )
+    plan = Plan(
+        activities=activities,
+        system=system,
+    )
+    amosa = AMOSA(
+        HL=3,
+        SL=10,
+        Tmax=1500,
+        Tmin=800,
+        iterations=20,
+        alpha=0.95,
+        maintenance_plan=plan,
+    )
+
+    amosa.run()
