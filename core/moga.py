@@ -322,10 +322,10 @@ class MOGA(object):
     def mutation(self, parents):
         """
         The method returns a population of mutated individuals.
-        The procedure parallel processes the individuals in parents.
+        The procedure parallel processes the individuals in `parents`.
 
         :param list parents: a list of individuals that are used to generate
-        the off spring.
+        the offspring.
         :return: a list of mutated individuals.
 
         """
@@ -592,3 +592,7 @@ class MOGAResults(object):
                 )
             )
         return hv
+
+
+if __name__ == '__main__':
+    pass
