@@ -1,7 +1,9 @@
 
 import random
 import numpy as np
+import pandas as pd
 from copy import deepcopy
+from plotly.express import scatter
 from multiprocessing import Pool, cpu_count
 
 
@@ -350,72 +352,54 @@ class AMOSA(object):
         """
         if self.archive is None:
             self.archive = self.generate_initial_population()
-        print('Initial population')
-        print(self.archive)
-        # TODO: perform clustering
         self.clustering()
-        print('Perform clustering ...')
-        print(self.archive)
 
         # chose a random solution from the archive
         current_pt = np.random.choice(self.archive)
-        j = 0
         while self.T >= self.Tmin:
-            print(f'================ Iteration {j} T: {self.T} ==============')
             for i in range(self.iter):
                 # generate a new solution by perturbation
                 new_pt = current_pt.perturbation(
                     p_mutation=0.25,
                     original_plan=self.plan
                 )
-                print('new_pt: ', new_pt)
                 # k_set is the set of solutions that dominate new_pt
                 k_set = [i for i in self.archive if i <= new_pt]
                 # d_set is the set containing the solutions dominated by new_pt
                 d_set = [i for i in self.archive if new_pt <= i]
                 # current_pt dominates the new_pt and k points from the archive
                 # dominate new_pt
-                print('iteration ', i, current_pt)
                 if current_pt <= new_pt:
-                    print('current_pt <= new_pt')
                     ave_dom = (sum(
                                 [self.domination_amount(i, new_pt)
                                     for i in k_set]
                             ) + self.domination_amount(current_pt, new_pt)) / \
                             (len(k_set) + 1)
-                    print('ave_dom:', ave_dom, 'p:', self.p(ave_dom))
                     # the new_pt is selected as the current_pr with probability
                     if np.random.rand() <= self.p(ave_dom):
                         # set new_pt as current_pt
                         current_pt = new_pt
-                    print('iteration:', i, current_pt)
 
                 # current_pt and new_pt are nondominated to each other
                 elif current_pt.nondominated(new_pt):
-                    print('current_pt nondominated by new_pt')
                     # check the domination status of new_pt against the points
                     # in the archive
                     # case 2a: new_pt is dominated by k points
                     if len(k_set) >= 1:
-                        print(f'new_pt is dominated by {len(k_set)} points')
                         ave_dom = sum([self.domination_amount(i, new_pt)
                                        for i in self.archive]) / len(k_set)
-                        print('ave_dom:', ave_dom, 'p:', self.p(ave_dom))
                         if np.random.rand() <= self.p(ave_dom):
                             # set new_pt as current_pt
                             current_pt = new_pt
                     # case 2b: new_pt is nondominating with respect to the
                     # other points in the archive
                     elif len(k_set) == 0:
-                        print('new_pt is nondominating with respect to the',
-                            'other points in the archive')
                         self.archive.append(deepcopy(new_pt))
                         current_pt = new_pt
                         if len(self.archive) >= self.SL:
                             self.clustering()
                     # case 2c: new_pt dominates k points in the archive
                     elif len(d_set) >= 1:
-                        print(f'new_pt dominates {len(d_set)} points in the archive')
                         current_pt = new_pt
                         self.archive.append(deepcopy(new_pt))
                         for i in d_set:
@@ -423,7 +407,6 @@ class AMOSA(object):
                     else:
                         raise NotImplementedError
                 elif new_pt <= current_pt:
-                    print('new_tp <= current_pt')
                     # new_pt dominates current_pt but k points in the archive
                     # dominate new_pt
                     if len(k_set) >= 1:
@@ -453,7 +436,88 @@ class AMOSA(object):
                     self.clustering()
             # Lower the temperature
             self.T = self.alpha * self.T
-            print(self.archive)
+            # Save the solutions in solution_history
+            self.solution_history.append(deepcopy(self.archive))
+
+
+class AMOSAResults(object):
+
+    def __init__(self, amosa):
+        # Sanity check
+        assert type(amosa) is AMOSA
+        # Define attributes
+        self.amosa = amosa
+
+    def __str__(self):
+        return "AMOSA:{} generations with {} solutions and {} resources"\
+            .format(
+                len(self.amosa.solution_history),
+                len(self.amosa.solution_history[-1]),
+                self.amosa.plan.system.resources
+            )
+
+    def to_dataframe(self):
+        """
+        Return a :class:`pandas.DataFrame` containing per individual
+        information. The values include :math:`LF`, :math:`IC`, rank,
+        generation, and ID of each solution.
+
+        :return: a :class:`pandas.DataFrame` object.
+
+        """
+        df = []
+        for iteration, solutions in enumerate(self.amosa.solution_history):
+            for idx, i in enumerate(solutions):
+                df.append(
+                    {
+                        "LF": i.plan.LF,
+                        "IC": i.plan.IC,
+                        "iteration": iteration,
+                        "ID": idx,
+                    }
+                )
+        df = pd.DataFrame(df)
+        return df
+
+    def pareto_front(self):
+        """
+        Returns a scatter plot representig the Pareto front of the last
+        generation.
+
+        """
+        df = self.to_dataframe()
+        # Filter only the last generation
+        df = df[df.iteration == df.iteration.max()]
+        fig = scatter(
+            data_frame=df,
+            x="LF",
+            y="IC",
+            hover_name="ID",
+            range_x=(df.LF.min() * 0.95, df.LF.max() * 1.05),
+            range_y=(df.IC.min() - 1, df.IC.max() + 2),
+        )
+        fig.update_layout(
+            title="Pareto front after {} ".format(
+                  len(self.amosa.solution_history)) +
+                  "generations with {} ".format(
+                  len(self.amosa.solution_history[-1])) +
+                  "solutions, {} ".format(self.amosa.plan.system.resources) +
+                  "resources"
+        )
+        return fig
+
+    def pareto_evolution(self):
+        """Returns an animation showing the evolution of the population."""
+        df = self.to_dataframe()
+        fig = scatter(
+            data_frame=df,
+            x="LF",
+            y="IC",
+            animation_frame="iteration",
+            range_x=(df.LF.min() * 0.95, df.LF.max() * 1.05),
+            range_y=(df.IC.min() - 1, df.IC.max() + 2),
+        )
+        return fig
 
 
 if __name__ == '__main__':
@@ -481,13 +545,19 @@ if __name__ == '__main__':
         system=system,
     )
     amosa = AMOSA(
-        HL=3,
-        SL=10,
+        HL=70,
+        SL=100,
         Tmax=1500,
         Tmin=800,
-        iterations=20,
-        alpha=0.95,
+        iterations=50,
+        alpha=0.98,
         maintenance_plan=plan,
     )
 
     amosa.run()
+
+    results = AMOSAResults(amosa)
+
+    fig = results.pareto_evolution()
+
+    fig.show()
