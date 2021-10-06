@@ -162,6 +162,8 @@ class AMOSA(object):
         """
         The single linkage algorithm is used to perform clustering.
         """
+        # filter out duplicates
+        self.remove_duplicates()
         # define the distance matrix
         d = np.zeros((len(self.archive), len(self.archive)))
         for i in range(len(self.archive)):
@@ -228,6 +230,17 @@ class AMOSA(object):
                 break
         self.archive = [i[0] for i in clusters]
 
+    def remove_duplicates(self):
+        x = []
+        for i in self.archive:
+            add = True
+            for j in x:
+                if i.score[0] == j.score[0] and i.score[1] == j.score[1]:
+                    add = False
+                    break
+            if add:
+                x.append(i)
+        self.archive = x
 
     def generate_individual(self, i=None):
         """
@@ -416,7 +429,8 @@ class AMOSA(object):
                     if len(k_set) >= 1:
                         domination_amounts = [self.domination_amount(i, new_pt)
                                             for i in self.archive]
-                        if np.random.rand() <= p(-min(domination_amounts)):
+                        if np.random.rand() <= \
+                            self.p(-min(domination_amounts)):
                             current_pt = self.archive[
                                 np.argmin(domination_amounts)]
                         else:
@@ -437,6 +451,7 @@ class AMOSA(object):
                         self.archive.append(current_pt)
                 if len(self.archive) > self.SL:
                     self.clustering()
+            # Lower the temperature
             self.T = self.alpha * self.T
             print(self.archive)
 
