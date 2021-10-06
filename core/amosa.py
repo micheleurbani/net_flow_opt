@@ -1,9 +1,9 @@
-
 import random
 import numpy as np
 import pandas as pd
 from copy import deepcopy
-from plotly.express import scatter
+from itertools import repeat
+from plotly.express import scatter, line
 from multiprocessing import Pool, cpu_count
 
 
@@ -346,6 +346,52 @@ class AMOSA(object):
         )
         return population
 
+    def fast_non_dominated_sort(self, population):
+        """
+        Apply the fast non-dominated sort algorithm as in Deb et al. [1]_.
+
+        :param list population: a list of :class:`core.moga.Individual`
+        objects.
+        :return: a list of lists; each list represents a front, and fronts are
+        returned in ascending order (from the best to the worst).
+
+        """
+
+        # Initialize the list of individuals
+        frontiers = [[]]
+        # Clean the population
+        for i in population:
+            i.rank = 0
+            i.dominatorCounter = 0
+            i.dominatedSolutions = list()
+        # Start the algorithm
+        for p in population:
+            for q in population:
+                if p.score[0] < q.score[0] and p.score[1] < q.score[1]:
+                    # p dominates q, add q to the set of solutions dominated
+                    # by p
+                    p.dominatedSolutions.append(q)
+                elif p.score[0] > q.score[0] and p.score[1] > q.score[1]:
+                    # p is dominated by q, increment the dominator counter of p
+                    p.dominatorCounter += 1
+            if p.dominatorCounter == 0:
+                p.rank = 1
+                frontiers[0].append(p)
+        i = 0
+        while frontiers[i]:
+            Q = list()
+            for p in frontiers[i]:
+                for q in p.dominatedSolutions:
+                    q.dominatorCounter -= 1
+                    if q.dominatorCounter == 0:
+                        q.rank = i + 2
+                        Q.append(q)
+            i += 1
+            frontiers.append(Q)
+        if not frontiers[-1]:
+            del frontiers[-1]
+        return frontiers
+
     def run(self):
         """
         The main procedure of the algorithm.
@@ -532,6 +578,67 @@ class AMOSAResults(object):
         df.to_csv("flask_app/static/" + fname, index=False)
         return fname
 
+    @staticmethod
+    def generation_HV(n_sample, list_of_scores, bounds):
+        lf_max, lf_min, ic_max, ic_min = bounds
+        dominated = 0
+        for _ in range(n_sample):
+            # Generate a random point
+            x = (
+                np.random.random() * (lf_max - lf_min) + lf_min,  # LF
+                np.random.random() * (ic_max - ic_min) + ic_min   # IC
+            )
+            for score in list_of_scores:
+                if score[0] < x[0] and score[1] < x[1]:
+                    dominated += 1
+                    break
+        return dominated / n_sample
+
+    def hypervolume_indicator(self, n_sample, lf_max, lf_min, ic_max, ic_min):
+        """
+        The method calculates the hyper-volume (HV) indicator of each
+        generation and returns the series of points required to plot it.
+        It is required to provide :math:`LF_{max}`, :math:`LF_{min}`,
+        :math:`IC_{max}`, and :math:`IC_{min}` so that several HV curves can be
+        compared.
+
+        :params int n_sample: the number of sample points used to evaluate the
+        HV indicator.
+        :params float lf_min: the lower bound for :math:`LF`.
+        :params float lf_max: the upper bound for :math:`LF`.
+        :params float ic_min: the lower bound for :math:`IC`.
+        :params float ic_max: the upper bound for :math:`IC`.
+
+        :return: the HV indicator value for each generation.
+        :rtype: list of float.
+
+        """
+        # Define a function for calculation of the HV of a single generation
+
+        # Retrieve the list of scores
+        scores = [
+            [
+                (ind.plan.LF, ind.plan.IC)
+                for ind in self.amosa.fast_non_dominated_sort(iteration)[0]
+            ]
+            for iteration in self.amosa.solution_history
+        ]
+        # Wrap bounds in a tuple
+        bounds = (lf_max, lf_min, ic_max, ic_min)
+
+        # Parallelize calculation
+        with Pool(processes=cpu_count()) as pool:
+            hv = pool.starmap(
+                AMOSAResults.generation_HV,
+                zip(
+                    repeat(n_sample, len(self.amosa.solution_history)),
+                    scores,
+                    repeat(bounds, len(self.amosa.solution_history))
+                )
+            )
+        return hv
+
+
 if __name__ == '__main__':
     from .system import Component, System
     from .utils import components, structure
@@ -562,7 +669,7 @@ if __name__ == '__main__':
         Tmax=1500,
         Tmin=800,
         iterations=50,
-        alpha=0.98,
+        alpha=0.9,
         maintenance_plan=plan,
     )
 
@@ -573,3 +680,19 @@ if __name__ == '__main__':
     fig = results.pareto_evolution()
 
     fig.show()
+
+    lf_max, lf_min, ic_max, ic_min = 0.0, 1e4, 0.0, 1e4
+    for generation in results.amosa.solution_history:
+        for ind in generation:
+            if ind.plan.LF > lf_max:
+                lf_max = ind.plan.LF
+            elif ind.plan.LF < lf_min:
+                lf_min = ind.plan.LF
+            if ind.plan.IC > ic_max:
+                ic_max = ind.plan.IC
+            elif ind.plan.IC < ic_min:
+                ic_min = ind.plan.IC
+    hv_values = results.hypervolume_indicator(1000, lf_max, lf_min, ic_max,
+                                              ic_min)
+
+    print(hv_values)
