@@ -220,6 +220,7 @@ def solution_analysis_callbacks(app):
         if solution_id is None or solution_type is None:
             raise PreventUpdate
         plan, population = load_last_generation(model_name)
+        solution_id = int(solution_id)
         if pareto_type == "pevo":
             return [], []
         else:
