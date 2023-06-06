@@ -138,14 +138,15 @@ def randomized_experiment(experiment_index, seed):
         initial_population = deepcopy(moga.population_history[-1])
 
 
-def repeat_random_experiment(n):
+def repeat_random_experiment(stop, start=0):
     """Repeat a random experiment n times."""
-    for i in range(n):
+    assert stop > start, "Start must be greater than stop."
+    for i in range(start, stop):
         randomized_experiment(i, i)
 
 
 def experiment_from_old_data():
-    seed(12345)
+    random.seed(12345)
     np.random.seed(12345)
 
     for r in [2, 3, 4]:
@@ -222,4 +223,4 @@ if __name__ == "__main__":
     #         moga = load(f)
     #     results.append(MOGAResults(moga))
     # hypervolume_multiple_experiments(results, 1000000)
-    repeat_random_experiment(30)
+    repeat_random_experiment(1, 0)
