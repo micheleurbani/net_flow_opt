@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "net-flow-opt"
+version = "1.0.0"
+description = "Maintenance optimization on networked systems."
+authors = ["Michele Urbani <michele@didatec.com>"]
+readme = "README.md"
+packages = [{include = "net_flow_opt"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+networkx = "^3.1"
+pymoo = "^0.6.0.1"
+pandas = "^2.0.3"
+plotly = "^5.16.1"
+
+
+[tool.poetry.group.dev.dependencies]
+ipykernel = "^6.25.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

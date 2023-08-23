@@ -1,9 +1,0 @@
-Multi-objective genetic algorithm
-=================================
-
-The multi-objective genetic algorithm implemented in the library is the
-well-known NSGA-II by Deb et al.
-
-.. automodule:: core.moga
-   :members:
-   :undoc-members:

@@ -1,13 +1,85 @@
-# Folders
-venv/
-.vscode/
-__*/
-cached_data/
-source/
-results_all/
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
 
-# Files
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+env/
+venv/
+my_env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+logs/
+results/
+data/solutions/
+*.aux
+instance/
+*.fdb_latexmk
+*.fls
+*.synchtex.gz
+*.out
+
+# PyInstaller
+#  Usually these files are written by a python script from a template
+#  before PyInstaller builds the exe, so as to inject date/other infos into it.
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+
+# Translations
+*.mo
+*.pot
+
+# Django stuff:
+*.log
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+target/
+
+# DotEnv configuration
 .env
-graph.png
-make.bat
-Makefile
+
+# Database
+*.db
+*.rdb
+
+# Pycharm
+.idea
+
+# VS Code
+.vscode/
+
+# Media files
+*.mp4
+commands-list.txt
