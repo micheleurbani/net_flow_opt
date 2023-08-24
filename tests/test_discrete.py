@@ -2,18 +2,22 @@ import unittest
 
 from pymoo.algorithms.moo.nsga2 import NSGA2
 from pymoo.optimize import minimize
+from pymoo.operators.crossover.sbx import SBX
+from pymoo.operators.mutation.pm import PM
+from pymoo.operators.repair.rounding import RoundingRepair
+from pymoo.operators.sampling.rnd import IntegerRandomSampling
 
 from net_flow_opt.utils import components, structure, activities_duration
 from net_flow_opt.system import System
 from net_flow_opt.scheduler import  Plan, Activity
-from net_flow_opt.continuous_model import ContinuousModel
+from net_flow_opt.discrete_model import DiscreteModel
 
 
-class TestContinuousAlgorithm(unittest.TestCase):
+class TestDiscreteAlgorithm(unittest.TestCase):
 
-    def test_continuous_algorithm(self):
+    def test_discrete_algorithm(self):
         pop_size = 150
-        termination = ('n_gen', 20)
+        termination = ('n_gen', 5)
         seed = 1124
         resources = 3
 
@@ -31,13 +35,16 @@ class TestContinuousAlgorithm(unittest.TestCase):
             activities=original_activities
         )
 
-        problem = ContinuousModel(
+        problem = DiscreteModel(
             system=system,
             original_plan=original_plan,
             resources=resources,
         )
 
         algorithm = NSGA2(
+            sampling=IntegerRandomSampling(),
+            crossover=SBX(prob=1.0, eta=3.0, vtype=float, repair=RoundingRepair()),
+            mutation=PM(prob=1.0, eta=3.0, vtype=float, repair=RoundingRepair()),
             pop_size=pop_size,
             eliminate_duplicates=True,
         )
