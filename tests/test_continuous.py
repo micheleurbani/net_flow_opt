@@ -1,12 +1,14 @@
 import unittest
+import numpy as np
 
 from pymoo.algorithms.moo.nsga2 import NSGA2
 from pymoo.optimize import minimize
 
-from net_flow_opt.utils import components, structure, activities_duration
 from net_flow_opt.system import System
 from net_flow_opt.scheduler import  Plan, Activity
+from net_flow_opt.callbacks import TrackPerformance
 from net_flow_opt.continuous_model import ContinuousModel
+from net_flow_opt.utils import components, structure, activities_duration
 
 
 class TestContinuousAlgorithm(unittest.TestCase):
@@ -16,10 +18,11 @@ class TestContinuousAlgorithm(unittest.TestCase):
         termination = ('n_gen', 20)
         seed = 1124
         resources = 3
+        eps = 1e-3
 
         system = System(structure, resources, components)
 
-        dates = [c.x_star for c in components]
+        dates = np.array([c.x_star for c in components])
 
         original_activities = [
             Activity(component, date, duration)
@@ -37,9 +40,23 @@ class TestContinuousAlgorithm(unittest.TestCase):
             resources=resources,
         )
 
+        T = np.max(dates)
+
+        d_t = np.vstack([- dates, T - dates])
+
+        i = np.argmax(np.abs(d_t), axis=0)
+
+        d_t = d_t[i, np.arange(d_t.shape[1])]
+
+        ref_point = np.array([
+            system.regular_flow * T,
+            np.sum([a.h(d_t[i] + eps) for i, a in enumerate(original_activities)])
+        ])
+
         algorithm = NSGA2(
             pop_size=pop_size,
             eliminate_duplicates=True,
+            callback=TrackPerformance(ref_point=ref_point)
         )
 
         res = minimize(

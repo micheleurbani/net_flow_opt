@@ -10,6 +10,7 @@ from net_flow_opt.system import Component, System
 from net_flow_opt.utils import components, structure, activities_duration
 from net_flow_opt.scheduler import Activity, Group, Plan
 from net_flow_opt.continuous_model import ContinuousModel
+from net_flow_opt.discrete_model import DiscreteModel
 
 
 # Set seed values
@@ -254,6 +255,74 @@ class TestContinuousModel(unittest.TestCase):
             system=self.system,
             original_plan=self.plan
         )
+
+
+class TestCoherencyOfModels(unittest.TestCase):
+
+    def setUp(self):
+
+        self.resources = 3
+
+        self.system = System(
+            structure=structure,
+            resources=self.resources,
+            components=components
+        )
+
+        self.dates = np.array([c.x_star for c in components])
+
+        self.activities = [
+            Activity(
+                component=c,
+                date=t,
+                duration=d
+            ) for c, t, d in zip(components, self.dates, activities_duration)
+        ]
+
+        self.original_plan = Plan(
+            activities=self.activities,
+            system=self.system
+        )
+
+    def test_coherency(self):
+
+        t = np.array([
+            21.46561531708072, 40.30077281139364, 23.17864500781415,
+            62.487727737829594, 24.629812070631683, 49.289791081576695,
+            50.30196127877438, 25.48484107055021, 25.48484113395957,
+            24.629812048149923
+        ])
+
+        grouping_structure = np.array([2, 4, 2, 8, 3, 5, 5, 3, 3, 3])
+
+        one_hot = np.zeros((len(grouping_structure), len(grouping_structure)))
+
+        one_hot[np.arange(len(grouping_structure)), grouping_structure] = 1
+
+        disc = DiscreteModel(
+            system=self.system,
+            original_plan=self.original_plan,
+            resources=self.resources
+        )
+
+        plan = Plan(
+            activities=self.activities,
+            system=self.system,
+            grouping_structure=one_hot,
+            original_plan=self.original_plan
+        )
+
+        print('Act start', [a.t for a in plan.activities])
+
+        print('\n', disc.evaluate(grouping_structure))
+
+        cont = ContinuousModel(
+            system=self.system,
+            original_plan=self.original_plan,
+            resources=self.resources
+        )
+
+        print('\n', cont.evaluate(t))
 
 
 if __name__ == "__main__":

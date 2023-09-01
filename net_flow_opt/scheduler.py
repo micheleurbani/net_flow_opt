@@ -189,12 +189,14 @@ class Plan(object):
         # Sort activities in descending order
         plan_data.sort_values(by=["Start"], inplace=True, ascending=False)
         # Save data in CSV for exporting
-        plan_data.to_csv(os.path.join(RESULTS, "gantt_data.csv"), index=False)
+        plan_data.to_csv(os.path.join("gantt_data.csv"), index=False)
         # Convert float dates to datetime
-        plan_data["Start"] = pd.to_datetime(plan_data["Start"] * 1e14,
-                                            format="%Y-%m-%d")
-        plan_data["Finish"] = pd.to_datetime(plan_data["Finish"] * 1e14,
-                                             format="%Y-%m-%d")
+        plan_data["Start"] = pd.to_datetime(
+            plan_data["Start"] * 1e14,
+        )
+        plan_data["Finish"] = pd.to_datetime(
+            plan_data["Finish"] * 1e14,
+        )
         # Create figure
         gantt = ff.create_gantt(
             plan_data,
@@ -218,12 +220,12 @@ class Plan(object):
         })
         history.sort(key=lambda x: x["date"])
         df = pd.DataFrame(history)
-        df.to_csv("flask_app/static/flow_data.csv", index=False)
+        df.to_csv("flow_data.csv", index=False)
         # Change real values used for dates with datetime strings
         fig = Figure()
         fig.add_trace(
             Scatter(
-                x=pd.to_datetime(df["date"] * 1e14, format="%Y-%m-%d"),
+                x=pd.to_datetime(df["date"] * 1e14),
                 y=df.flow,
                 line_shape="hv",
             )
@@ -307,7 +309,7 @@ class Plan(object):
             A.append(c)
             lb.append(-1e5)
             ub.append(-groups[i]["duration"])
-        # Define the LinearConstraint objecet
+        # Define the LinearConstraint object
         linear_constraints = LinearConstraint(
             A=np.stack(A),
             lb=np.array(lb),
@@ -405,9 +407,9 @@ class Plan(object):
 
     def generate_flow_history(self):
         """
-        The method retuns the dictionary obtained by evaluating
+        The method returns the dictionary obtained by evaluating
         :method:`core.scheduler.generate_structure_history` enriched with the
-        value maximum flow value under the specific system configurations.
+        maximum flow value under the specific system configurations.
         The maximum flow value is always calculated from source `s` to sink
         `t`.
 

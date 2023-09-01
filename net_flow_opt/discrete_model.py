@@ -1,28 +1,25 @@
 
 import numpy as np
-
-from pymoo.core.problem import ElementwiseProblem
+from copy import deepcopy
 
 from net_flow_opt.system import System
 from net_flow_opt.scheduler import Plan, Activity
+from net_flow_opt.base_model import BaseModel
 
 
-class DiscreteModel(ElementwiseProblem):
+class DiscreteModel(BaseModel):
 
     def __init__(self, system: System, original_plan: Plan, resources: int
     ) -> None:
 
-        self.system = system
         self.original_plan = original_plan
-        self.r = resources
 
         super().__init__(
-            n_var=system.N,
-            n_obj=2,
-            n_ieq_constr=system.N,
             xl=1,
-            xu=system.N,
+            xu=system.N + 1,
             vtype=int,
+            system=system,
+            resources=resources
         )
 
     def _evaluate(self, x, out, *args, **kwargs):
@@ -45,16 +42,16 @@ class DiscreteModel(ElementwiseProblem):
 
         # define maintenance plan
         plan = Plan(
-            activities=activities,
-            system=self.system,
+            activities=deepcopy(activities),
+            system=deepcopy(self.system),
             grouping_structure=grouping_structure,
-            original_plan=self.original_plan,
+            original_plan=deepcopy(self.original_plan),
         )
 
         out["F"] = np.array([plan.IC, plan.LF])
         out["G"] = np.array([
             np.sum([
-                b.t < a.t <= b.t + b.d for b in plan.activities
+                b.t <= a.t <= b.t + b.d for b in plan.activities
             ]) - self.r for a in plan.activities
         ])
 
