@@ -1,4 +1,5 @@
 import unittest
+import numpy as np
 
 from pymoo.algorithms.moo.nsga2 import NSGA2
 from pymoo.optimize import minimize
@@ -11,6 +12,7 @@ from net_flow_opt.utils import components, structure, activities_duration
 from net_flow_opt.system import System
 from net_flow_opt.scheduler import  Plan, Activity
 from net_flow_opt.discrete_model import DiscreteModel
+from net_flow_opt.sampling import GroupingStructureSampling
 
 
 class TestDiscreteAlgorithm(unittest.TestCase):
@@ -56,6 +58,33 @@ class TestDiscreteAlgorithm(unittest.TestCase):
             seed=seed,
             verbose=True
         )
+
+    def test_discrete_sampling(self):
+        s = GroupingStructureSampling()
+
+        resources = 3
+
+        system = System(structure, resources, components)
+
+        dates = [c.x_star for c in components]
+
+        original_activities = [
+            Activity(component, date, duration)
+            for component, date, duration in zip(system.components, dates, activities_duration)
+        ]
+
+        original_plan = Plan(
+            system=system,
+            activities=original_activities
+        )
+
+        problem = DiscreteModel(
+            system=system,
+            original_plan=original_plan,
+            resources=resources,
+        )
+
+        X = s.do(problem, 3)
 
 
 if __name__ == '__main__':

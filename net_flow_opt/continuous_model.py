@@ -11,20 +11,19 @@ from net_flow_opt.scheduler import Plan, Activity
 
 class ContinuousModel(BaseModel):
 
-    def __init__(self, system: System, resources: int) -> None:
+    def __init__(self, system: System, resources: int, activities_duration) -> None:
+
+        self.durations = activities_duration
 
         super().__init__(
             system=system,
             resources=resources,
             xl=0,
-            xu=max([c.x_star for c in self.system.components]) * 1.5,
+            xu=max([c.x_star for c in system.components]) * 1.5,
             vtype=float,
         )
 
     def _evaluate(self, x, out, *args, **kwargs):
-
-        # retrieve activities durations
-        durations = [a.d for a in self.original_plan.activities]
 
         # define activities
         activities = [
@@ -33,7 +32,7 @@ class ContinuousModel(BaseModel):
                 date=t,
                 duration=d,
             )
-        for component, t, d in zip(self.system.components, x, durations)]
+        for component, t, d in zip(self.system.components, x, self.durations)]
 
         # define maintenance plan
         plan = Plan(

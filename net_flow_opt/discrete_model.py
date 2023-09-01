@@ -16,7 +16,7 @@ class DiscreteModel(BaseModel):
 
         super().__init__(
             xl=1,
-            xu=system.N + 1,
+            xu=system.N,
             vtype=int,
             system=system,
             resources=resources
