@@ -1,8 +1,6 @@
 import networkx as nx
-from random import random
 
-
-from .system import Component
+from .network import Component
 
 
 components = [
@@ -12,16 +10,17 @@ components = [
         alpha=35,
         beta=2.1,
         capacity=20,
+        service_time=2.4
     ),
-    Component(50, 35, 46, 1.9, 15),
-    Component(27, 15, 45, 2.1, 9),
-    Component(46, 22, 55, 1.4, 11),
-    Component(29, 15, 34, 2.5, 7),
-    Component(31, 21, 55, 1.9, 8),
-    Component(55, 26, 61, 1.6, 15),
-    Component(61, 27, 58, 2.2, 21),
-    Component(45, 18, 36, 2.4, 10),
-    Component(50, 17, 39, 2.0, 9),
+    Component(50, 35, 46, 1.9, 15, 2.7),
+    Component(27, 15, 45, 2.1, 9, 3.5),
+    Component(46, 22, 55, 1.4, 11, 3.3),
+    Component(29, 15, 34, 2.5, 7, 2.05),
+    Component(31, 21, 55, 1.9, 8, 1.64),
+    Component(55, 26, 61, 1.6, 15, 2.27),
+    Component(61, 27, 58, 2.2, 21, 2.87),
+    Component(45, 18, 36, 2.4, 10, 3.74),
+    Component(50, 17, 39, 2.0, 9, 3.18),
 ]
 
 structure = nx.DiGraph()
@@ -46,5 +45,3 @@ structure.add_edges_from([
     (components[8], "t"),
     (components[9], "t"),
 ])
-
-activities_duration = [random() * 3 + 1 for i in range(len(components))]
